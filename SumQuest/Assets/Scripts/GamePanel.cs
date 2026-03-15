@@ -15,7 +15,7 @@ public class GamePanel : MonoBehaviour
     private int LeftNumberCount;
     private Dictionary<int, int> Numbers = new();
     private Dictionary<int, Button> Buttons = new();
-    private Dictionary<ImageType, Image> Images = new();
+    
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -28,10 +28,10 @@ public class GamePanel : MonoBehaviour
         GameResult.gameObject.SetActive(false);
         Next.onClick.AddListener(() => NextLevel());
           
-        InitializeImages();
+        GameNumbers.Initialize(InitialImages);
 
         DrawNumbers();
-        InitialTarget = GetNumberImage(Config.Target);
+        InitialTarget = GameNumbers.GetNumberImage(Config.Target);
     }
 
     // Update is called once per frame
@@ -47,7 +47,7 @@ public class GamePanel : MonoBehaviour
         Config.Target++;
         Select = -1;
         DrawNumbers();
-        InitialTarget = GetNumberImage(Config.Target);
+        InitialTarget.sprite = GameNumbers.GetNumberImage(Config.Target).sprite;
         GameResult.gameObject.SetActive(false);
     }
 
@@ -68,9 +68,9 @@ public class GamePanel : MonoBehaviour
                 button.transform.position = 
                     new Vector3(startPosition.x + 160 * i, startPosition.y - 160 * j, startPosition.z);
                 button.transform.SetParent(InitialNumber.transform.parent);
-                button.name = Index(i, j).ToString();
+                button.name = Config.Index(i, j).ToString();
                 button.gameObject.SetActive(true);
-                var buttonIndex = Index(i, j);
+                var buttonIndex = Config.Index(i, j);
                 button.onClick.AddListener(() => OnButtonClick(buttonIndex));
                 Buttons[buttonIndex] = button;
 
@@ -78,61 +78,10 @@ public class GamePanel : MonoBehaviour
                 Numbers[buttonIndex] = num;
                 ++numberIndex;
 
-                var numImage = GetNumberImage(num);
+                var numImage = GameNumbers.GetNumberImage(num);
                 numImage.transform.position = button.transform.position;
             }
         }
-    }
-
-    private void InitializeImages()
-    {
-        foreach (var image in InitialImages)
-        {
-            image.gameObject.SetActive(false);
-            switch (image.name)
-            {
-                case "0": Images[ImageType.Number0] = image; break;
-                case "1": Images[ImageType.Number1] = image; break;
-                case "2": Images[ImageType.Number2] = image; break;
-                case "3": Images[ImageType.Number3] = image; break;
-                case "4": Images[ImageType.Number4] = image; break;
-                case "5": Images[ImageType.Number5] = image; break;
-                case "6": Images[ImageType.Number6] = image; break;
-                case "7": Images[ImageType.Number7] = image; break;
-                case "8": Images[ImageType.Number8] = image; break;
-                case "9": Images[ImageType.Number9] = image; break;
-                case "Hide": Images[ImageType.Hide] = image; break;
-                case "Select": Images[ImageType.Select] = image; break;
-                default: break;
-            }
-        }
-    }
-
-    private Image GetNumberImage(int number)
-    {
-        if (number < 0 || number > 9)
-        {
-            return null;
-        }
-        var image =  number switch
-        {
-            0 => Images[ImageType.Number0],
-            1 => Images[ImageType.Number1],
-            2 => Images[ImageType.Number2],
-            3 => Images[ImageType.Number3],
-            4 => Images[ImageType.Number4],
-            5 => Images[ImageType.Number5],
-            6 => Images[ImageType.Number6],
-            7 => Images[ImageType.Number7],
-            8 => Images[ImageType.Number8],
-            9 => Images[ImageType.Number9],
-            _ => null,
-        };
-        var newImage = GameObject.Instantiate(image, image.transform.parent);
-        newImage.gameObject.SetActive(true);
-        newImage.raycastTarget = false;
-
-        return newImage;
     }
 
     private List<int> InitializeNumbers()
@@ -157,13 +106,13 @@ public class GamePanel : MonoBehaviour
         if (Select == -1)
         {
             Select = index;
-            DrawSelect(index);
+            GameNumbers.DrawSelect(index, Buttons[index].transform.position);
             return;
         }
         if (Select == index)
         {
             Select = -1;
-            Images[ImageType.Select].gameObject.SetActive(false);
+            GameNumbers.HideSelect();
             return;
         }
         if (Numbers[Select] + Numbers[index] == Config.Target)
@@ -171,7 +120,7 @@ public class GamePanel : MonoBehaviour
             Buttons[Select].gameObject.SetActive(false);
             Buttons[index].gameObject.SetActive(false);
             Select = -1;
-            Images[ImageType.Select].gameObject.SetActive(false);
+            GameNumbers.HideSelect();
             InitialEffect.GetComponent<FrameAnimation>().Play();
             LeftNumberCount -= 2;
             if (LeftNumberCount <= 0)
@@ -181,21 +130,6 @@ public class GamePanel : MonoBehaviour
             return;
         }
         Select = index;
-        DrawSelect(index);
-    }
-
-    private void DrawSelect(int index)
-    {
-        var image = Images[ImageType.Select];
-        image.gameObject.SetActive(true);
-        var button = Buttons[index];
-        image.transform.position = button.transform.position;
-        image.raycastTarget = false;
-        image.transform.SetAsLastSibling();
-    }
-
-    private int Index(int i, int j)
-    {
-        return j * 100 + i;
-    }
+        GameNumbers.DrawSelect(index, Buttons[index].transform.position);
+    }  
 }

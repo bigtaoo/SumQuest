@@ -53,6 +53,7 @@
     <Compile Include="Assets/Scripts/Helper.cs" />
     <Compile Include="Assets/Scripts/Config.cs" />
     <Compile Include="Assets/Scripts/ImageType.cs" />
+    <Compile Include="Assets/Scripts/GameNumbers.cs" />
     <Compile Include="Assets/Scripts/GamePanel.cs" />
   </ItemGroup>
   <ItemGroup>
