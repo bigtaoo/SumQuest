@@ -34,7 +34,7 @@ public class GamePanel : MonoBehaviour
         DrawNumbers();
         var headImage = GameNumbers.GetNumberImage(Config.Target);
         InitialTarget.sprite = headImage.sprite;
-        InitialTarget.SetNativeSize();
+        // InitialTarget.SetNativeSize();
         headImage.gameObject.SetActive(false);
     }
 
@@ -53,7 +53,7 @@ public class GamePanel : MonoBehaviour
         DrawNumbers();
         var headImage = GameNumbers.GetNumberImage(Config.Target);
         InitialTarget.sprite = headImage.sprite;
-        InitialTarget.SetNativeSize();
+        // InitialTarget.SetNativeSize();
         headImage.gameObject.SetActive(false);
         GameResult.gameObject.SetActive(false);
     }
@@ -67,7 +67,7 @@ public class GamePanel : MonoBehaviour
         {
             for (int j = 0; j < Config.Height; ++j)
             {
-                var button = GameObject.Instantiate(InitialNumber);
+                var button = GetButtonObject();
                 button.transform.position = 
                     new Vector3(startPosition.x + 160 * i, startPosition.y - 160 * j, startPosition.z);
                 button.transform.SetParent(InitialNumber.transform.parent);
@@ -84,6 +84,18 @@ public class GamePanel : MonoBehaviour
                 GameNumbers.DrawNumber(buttonIndex, num, button.transform.position);
             }
         }
+    }
+
+    private Button GetButtonObject()
+    {
+        foreach (var o in Buttons.Values)
+        {
+            if (!o.IsActive())
+            {
+                return o;
+            }
+        }
+        return GameObject.Instantiate(InitialNumber);
     }
 
     private List<int> InitializeNumbers()
@@ -120,7 +132,9 @@ public class GamePanel : MonoBehaviour
         if (Numbers[Select] + Numbers[index] == Config.Target)
         {
             Buttons[Select].gameObject.SetActive(false);
+            Buttons[Select].onClick.RemoveAllListeners();
             Buttons[index].gameObject.SetActive(false);
+            Buttons[index].onClick.RemoveAllListeners();
             GameNumbers.HideNumer(Select);
             GameNumbers.HideNumer(index);
             Effect.Play(Buttons[Select].transform.position, Buttons[index].transform.position);
