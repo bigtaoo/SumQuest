@@ -29,6 +29,7 @@ public class GamePanel : MonoBehaviour
         Next.onClick.AddListener(() => NextLevel());
           
         GameNumbers.Initialize(InitialImages);
+        Effect.Initialize(InitialEffect);
 
         DrawNumbers();
         InitialTarget = GameNumbers.GetNumberImage(Config.Target);
@@ -119,9 +120,9 @@ public class GamePanel : MonoBehaviour
         {
             Buttons[Select].gameObject.SetActive(false);
             Buttons[index].gameObject.SetActive(false);
+            Effect.Play(Buttons[Select].transform.position, Buttons[index].transform.position);
             Select = -1;
-            GameNumbers.HideSelect();
-            InitialEffect.GetComponent<FrameAnimation>().Play();
+            GameNumbers.HideSelect();           
             LeftNumberCount -= 2;
             if (LeftNumberCount <= 0)
             {
