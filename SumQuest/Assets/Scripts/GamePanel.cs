@@ -11,10 +11,8 @@ public class GamePanel : MonoBehaviour
     [SerializeField] private GameObject GameResult;
     [SerializeField] private Button Next;
 
-    private int Width;
-    private int Height;
-    private int Target;
     private int Select;
+    private int LeftNumberCount;
     private Dictionary<int, int> Numbers = new();
     private Dictionary<int, Button> Buttons = new();
     private Dictionary<ImageType, Image> Images = new();
@@ -22,22 +20,45 @@ public class GamePanel : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        Width = 5;
-        Height = 6;
-        Target = 6;
+        Config.Width = 5;
+        Config.Height = 6;
+        Config.Target = 6;
         Select = -1;
-        InitialNumber.gameObject.SetActive(false);
-        var startPosition = InitialNumber.transform.position;
-
+        InitialNumber.gameObject.SetActive(false);      
         GameResult.gameObject.SetActive(false);
-
-        var randomNumbers = InitializeNumbers();
+        Next.onClick.AddListener(() => NextLevel());
+          
         InitializeImages();
 
+        DrawNumbers();
+        InitialTarget = GetNumberImage(Config.Target);
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
+        
+    }
+
+    private void NextLevel()
+    {
+        Config.Width = 5;
+        Config.Height = 6;
+        Config.Target++;
+        Select = -1;
+        DrawNumbers();
+        InitialTarget = GetNumberImage(Config.Target);
+        GameResult.gameObject.SetActive(false);
+    }
+
+    private void DrawNumbers()
+    {
+        var startPosition = InitialNumber.transform.position;
+        var randomNumbers = InitializeNumbers();
         var numberIndex = 0;
-        for (int i = 0; i < Width; ++i)
+        for (int i = 0; i < Config.Width; ++i)
         {
-            for (int j = 0; j < Height; ++j)
+            for (int j = 0; j < Config.Height; ++j)
             {
                 if ((i == 1 || i == 2 || i == 3) && (j == 2 || j == 3))
                 {
@@ -61,13 +82,6 @@ public class GamePanel : MonoBehaviour
                 numImage.transform.position = button.transform.position;
             }
         }
-
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
     }
 
     private void InitializeImages()
@@ -123,12 +137,12 @@ public class GamePanel : MonoBehaviour
 
     private List<int> InitializeNumbers()
     {
-        int count = Width * Height - 6;
+        LeftNumberCount = Config.Width * Config.Height - 6;
         var randomNumbers = new List<int>();
-        for (int i = 0; i < count; i+=2)
+        for (int i = 0; i < LeftNumberCount; i+=2)
         {
-            int a = Random.Range(1, Target - 1);
-            int b = Target - a;
+            int a = Random.Range(1, Config.Target - 1);
+            int b = Config.Target - a;
             randomNumbers.Add(a);
             randomNumbers.Add(b);
         }
@@ -152,13 +166,18 @@ public class GamePanel : MonoBehaviour
             Images[ImageType.Select].gameObject.SetActive(false);
             return;
         }
-        if (Numbers[Select] + Numbers[index] == Target)
+        if (Numbers[Select] + Numbers[index] == Config.Target)
         {
             Buttons[Select].gameObject.SetActive(false);
             Buttons[index].gameObject.SetActive(false);
             Select = -1;
             Images[ImageType.Select].gameObject.SetActive(false);
             InitialEffect.GetComponent<FrameAnimation>().Play();
+            LeftNumberCount -= 2;
+            if (LeftNumberCount <= 0)
+            {
+                GameResult.gameObject.SetActive(true);
+            }
             return;
         }
         Select = index;
