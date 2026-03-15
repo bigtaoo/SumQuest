@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -5,26 +6,32 @@ using UnityEngine.UI;
 public static class GameNumbers
 {
     private static Dictionary<ImageType, Image> Images = new();
+    private static Dictionary<ImageType, List<Image>> AllImages = new();
 
     public static void Initialize(List<Image> numberImages)
     {
+        foreach (ImageType e in Enum.GetValues(typeof(ImageType)))
+        {
+            AllImages.Add(e, new List<Image>());
+        }
         foreach (var image in numberImages)
         {
             image.gameObject.SetActive(false);
+            image.raycastTarget = false;
             switch (image.name)
             {
-                case "0": Images[ImageType.Number0] = image; break;
-                case "1": Images[ImageType.Number1] = image; break;
-                case "2": Images[ImageType.Number2] = image; break;
-                case "3": Images[ImageType.Number3] = image; break;
-                case "4": Images[ImageType.Number4] = image; break;
-                case "5": Images[ImageType.Number5] = image; break;
-                case "6": Images[ImageType.Number6] = image; break;
-                case "7": Images[ImageType.Number7] = image; break;
-                case "8": Images[ImageType.Number8] = image; break;
-                case "9": Images[ImageType.Number9] = image; break;
-                case "Hide": Images[ImageType.Hide] = image; break;
-                case "Select": Images[ImageType.Select] = image; break;
+                case "0": Images[ImageType.Number0] = image; AllImages[ImageType.Number0].Add(image); break;
+                case "1": Images[ImageType.Number1] = image; AllImages[ImageType.Number1].Add(image); break;
+                case "2": Images[ImageType.Number2] = image; AllImages[ImageType.Number2].Add(image); break;
+                case "3": Images[ImageType.Number3] = image; AllImages[ImageType.Number3].Add(image); break;
+                case "4": Images[ImageType.Number4] = image; AllImages[ImageType.Number4].Add(image); break;
+                case "5": Images[ImageType.Number5] = image; AllImages[ImageType.Number5].Add(image); break;
+                case "6": Images[ImageType.Number6] = image; AllImages[ImageType.Number6].Add(image); break;
+                case "7": Images[ImageType.Number7] = image; AllImages[ImageType.Number7].Add(image); break;
+                case "8": Images[ImageType.Number8] = image; AllImages[ImageType.Number8].Add(image); break;
+                case "9": Images[ImageType.Number9] = image; AllImages[ImageType.Number9].Add(image); break;
+                case "Hide": Images[ImageType.Hide] = image; AllImages[ImageType.Hide].Add(image); break;
+                case "Select": Images[ImageType.Select] = image; AllImages[ImageType.Select].Add(image); break;
                 default: break;
             }
         }
@@ -36,25 +43,43 @@ public static class GameNumbers
         {
             return null;
         }
-        var image =  number switch
+        var imageType = number switch
         {
-            0 => Images[ImageType.Number0],
-            1 => Images[ImageType.Number1],
-            2 => Images[ImageType.Number2],
-            3 => Images[ImageType.Number3],
-            4 => Images[ImageType.Number4],
-            5 => Images[ImageType.Number5],
-            6 => Images[ImageType.Number6],
-            7 => Images[ImageType.Number7],
-            8 => Images[ImageType.Number8],
-            9 => Images[ImageType.Number9],
-            _ => null,
+            0 => ImageType.Number0,
+            1 => ImageType.Number1,
+            2 => ImageType.Number2,
+            3 => ImageType.Number3,
+            4 => ImageType.Number4,
+            5 => ImageType.Number5,
+            6 => ImageType.Number6,
+            7 => ImageType.Number7,
+            8 => ImageType.Number8,
+            9 => ImageType.Number9,
+            _ => ImageType.Hide,
         };
+        var images = AllImages[imageType];
+        foreach (var m in images)
+        {
+            if (!m.IsActive())
+            {
+                m.gameObject.SetActive(true);
+                return m;
+            }
+        }
+
+        var image =  Images[imageType];
         var newImage = GameObject.Instantiate(image, image.transform.parent);
         newImage.gameObject.SetActive(true);
         newImage.raycastTarget = false;
+        images.Add(newImage);
 
         return newImage;
+    }
+
+    public static void DrawNumber(int index, int number, Vector3 position)
+    {
+        var numImage = GetNumberImage(number);
+        numImage.transform.position = position;
     }
 
     public static void DrawSelect(int index, Vector3 position)

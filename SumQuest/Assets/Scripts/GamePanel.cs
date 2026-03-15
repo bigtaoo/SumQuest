@@ -61,10 +61,6 @@ public class GamePanel : MonoBehaviour
         {
             for (int j = 0; j < Config.Height; ++j)
             {
-                if ((i == 1 || i == 2 || i == 3) && (j == 2 || j == 3))
-                {
-                    continue;
-                }
                 var button = GameObject.Instantiate(InitialNumber);
                 button.transform.position = 
                     new Vector3(startPosition.x + 160 * i, startPosition.y - 160 * j, startPosition.z);
@@ -87,7 +83,7 @@ public class GamePanel : MonoBehaviour
 
     private List<int> InitializeNumbers()
     {
-        LeftNumberCount = Config.Width * Config.Height - 6;
+        LeftNumberCount = Config.Width * Config.Height;
         var randomNumbers = new List<int>();
         for (int i = 0; i < LeftNumberCount; i+=2)
         {

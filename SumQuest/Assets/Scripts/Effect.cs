@@ -9,6 +9,7 @@ public static class Effect
     public static void Initialize(GameObject effect)
     {
         EffectObject = effect;
+        EffectObject.gameObject.SetActive(false);
         Effects.Add(EffectObject);
     }
 
@@ -32,6 +33,9 @@ public static class Effect
                 return effect;
             }
         }
-        return GameObject.Instantiate(EffectObject, EffectObject.transform.parent);
+        var g = GameObject.Instantiate(EffectObject, EffectObject.transform.parent);
+        Effects.Add(g);
+
+        return g;
     }
 }
