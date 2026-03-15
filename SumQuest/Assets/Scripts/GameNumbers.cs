@@ -7,6 +7,7 @@ public static class GameNumbers
 {
     private static Dictionary<ImageType, Image> Images = new();
     private static Dictionary<ImageType, List<Image>> AllImages = new();
+    private static Dictionary<int, Image> Numbers = new();
 
     public static void Initialize(List<Image> numberImages)
     {
@@ -80,6 +81,12 @@ public static class GameNumbers
     {
         var numImage = GetNumberImage(number);
         numImage.transform.position = position;
+        Numbers[index] = numImage;
+    }
+
+    public static void HideNumer(int index)
+    {
+        Numbers[index].gameObject.SetActive(false);
     }
 
     public static void DrawSelect(int index, Vector3 position)

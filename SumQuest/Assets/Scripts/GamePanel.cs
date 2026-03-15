@@ -32,7 +32,10 @@ public class GamePanel : MonoBehaviour
         Effect.Initialize(InitialEffect);
 
         DrawNumbers();
-        InitialTarget = GameNumbers.GetNumberImage(Config.Target);
+        var headImage = GameNumbers.GetNumberImage(Config.Target);
+        InitialTarget.sprite = headImage.sprite;
+        InitialTarget.SetNativeSize();
+        headImage.gameObject.SetActive(false);
     }
 
     // Update is called once per frame
@@ -48,7 +51,10 @@ public class GamePanel : MonoBehaviour
         Config.Target++;
         Select = -1;
         DrawNumbers();
-        InitialTarget.sprite = GameNumbers.GetNumberImage(Config.Target).sprite;
+        var headImage = GameNumbers.GetNumberImage(Config.Target);
+        InitialTarget.sprite = headImage.sprite;
+        InitialTarget.SetNativeSize();
+        headImage.gameObject.SetActive(false);
         GameResult.gameObject.SetActive(false);
     }
 
@@ -75,8 +81,7 @@ public class GamePanel : MonoBehaviour
                 Numbers[buttonIndex] = num;
                 ++numberIndex;
 
-                var numImage = GameNumbers.GetNumberImage(num);
-                numImage.transform.position = button.transform.position;
+                GameNumbers.DrawNumber(buttonIndex, num, button.transform.position);
             }
         }
     }
@@ -116,6 +121,8 @@ public class GamePanel : MonoBehaviour
         {
             Buttons[Select].gameObject.SetActive(false);
             Buttons[index].gameObject.SetActive(false);
+            GameNumbers.HideNumer(Select);
+            GameNumbers.HideNumer(index);
             Effect.Play(Buttons[Select].transform.position, Buttons[index].transform.position);
             Select = -1;
             GameNumbers.HideSelect();           
