@@ -8,6 +8,8 @@ public class GamePanel : MonoBehaviour
     [SerializeField] private Image InitialTarget;
     [SerializeField] private GameObject InitialEffect;
     [SerializeField] private List<Image> InitialImages;
+    [SerializeField] private GameObject GameResult;
+    [SerializeField] private Button Next;
 
     private int Width;
     private int Height;
@@ -26,6 +28,8 @@ public class GamePanel : MonoBehaviour
         Select = -1;
         InitialNumber.gameObject.SetActive(false);
         var startPosition = InitialNumber.transform.position;
+
+        GameResult.gameObject.SetActive(false);
 
         var randomNumbers = InitializeNumbers();
         InitializeImages();
