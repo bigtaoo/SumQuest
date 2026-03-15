@@ -81,6 +81,8 @@ public class GamePanel : MonoBehaviour
                 case "7": Images[ImageType.Number7] = image; break;
                 case "8": Images[ImageType.Number8] = image; break;
                 case "9": Images[ImageType.Number9] = image; break;
+                case "Hide": Images[ImageType.Hide] = image; break;
+                case "Select": Images[ImageType.Select] = image; break;
                 default: break;
             }
         }
@@ -135,11 +137,13 @@ public class GamePanel : MonoBehaviour
         if (Select == -1)
         {
             Select = index;
+            DrawSelect(index);
             return;
         }
         if (Select == index)
         {
             Select = -1;
+            Images[ImageType.Select].gameObject.SetActive(false);
             return;
         }
         if (Numbers[Select] + Numbers[index] == Target)
@@ -147,9 +151,21 @@ public class GamePanel : MonoBehaviour
             Buttons[Select].gameObject.SetActive(false);
             Buttons[index].gameObject.SetActive(false);
             Select = -1;
+            Images[ImageType.Select].gameObject.SetActive(false);
             return;
         }
         Select = index;
+        DrawSelect(index);
+    }
+
+    private void DrawSelect(int index)
+    {
+        var image = Images[ImageType.Select];
+        image.gameObject.SetActive(true);
+        var button = Buttons[index];
+        image.transform.position = button.transform.position;
+        image.raycastTarget = false;
+        image.transform.SetAsLastSibling();
     }
 
     private int Index(int i, int j)
