@@ -5,6 +5,8 @@ using UnityEngine.UI;
 public class GamePanel : MonoBehaviour
 {
     [SerializeField] private Button InitialNumber;
+    [SerializeField] private Image InitialTarget;
+    [SerializeField] private GameObject InitialEffect;
     [SerializeField] private List<Image> InitialImages;
 
     private int Width;
@@ -152,6 +154,7 @@ public class GamePanel : MonoBehaviour
             Buttons[index].gameObject.SetActive(false);
             Select = -1;
             Images[ImageType.Select].gameObject.SetActive(false);
+            InitialEffect.GetComponent<FrameAnimation>().Play();
             return;
         }
         Select = index;
