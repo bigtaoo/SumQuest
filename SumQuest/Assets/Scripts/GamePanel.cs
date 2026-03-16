@@ -18,10 +18,7 @@ public class GamePanel : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        Config.Width = 5;
-        Config.Height = 6;
-        Config.Target = 6;
-        Config.Select = -1;
+        Config.Initialize();
         InitialNumber.gameObject.SetActive(false);      
         GameResult.gameObject.SetActive(false);
         Next.onClick.AddListener(() => NextLevel());
@@ -44,10 +41,7 @@ public class GamePanel : MonoBehaviour
 
     private void NextLevel()
     {
-        Config.Width = 5;
-        Config.Height = 6;
-        Config.Target++;
-        Config.Select = -1;
+        Config.NextLevel();
         DrawNumbers();
         var headImage = GameNumbers.GetNumberImage(Config.Target);
         InitialTarget.sprite = headImage.sprite;
@@ -67,7 +61,8 @@ public class GamePanel : MonoBehaviour
             {
                 var button = GetButtonObject();
                 button.transform.position = 
-                    new Vector3(startPosition.x + 160 * i, startPosition.y - 160 * j, startPosition.z);
+                    new Vector3(startPosition.x + (Config.ButtonWidth + Config.ButtonPadding) * i, 
+                    startPosition.y - (Config.ButtonHeight + Config.ButtonPadding) * j, startPosition.z);
                 button.transform.SetParent(InitialNumber.transform.parent);
                 button.name = Config.Index(i, j).ToString();
                 button.gameObject.SetActive(true);
