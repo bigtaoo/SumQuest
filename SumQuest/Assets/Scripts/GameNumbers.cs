@@ -87,6 +87,7 @@ public static class GameNumbers
         {
             var numImage = GetNumberImage(number);
             numImage.transform.position = position;
+            numImage.transform.localScale = new Vector3(1.0f, 1.0f, 1);
             Numbers[index].Add(numImage);
         }
         else if (number >= 10 && number <= 99)
@@ -95,10 +96,12 @@ public static class GameNumbers
             var digit = number % 10;
 
             var numImage = GetNumberImage(ten);
-            numImage.transform.position = new Vector3(position.x - Config.NumberImageSize / 2, position.y, position.z);
+            numImage.transform.position = new Vector3(position.x - Config.NumberImageSize / 3, position.y, position.z);
+            numImage.transform.localScale = new Vector3(0.7f, 0.7f, 1);
             Numbers[index].Add(numImage);
             numImage = GetNumberImage(digit);
-            numImage.transform.position = new Vector3(position.x + Config.NumberImageSize / 2, position.y, position.z);
+            numImage.transform.position = new Vector3(position.x + Config.NumberImageSize / 3, position.y, position.z);
+            numImage.transform.localScale = new Vector3(0.7f, 0.7f, 1);
             Numbers[index].Add(numImage);
         }
     }
