@@ -1,0 +1,285 @@
+name: iOS Build & Upload (LFS + Per-Target Manual Sign + Stable Codesign + API Key + Privacy + Version)
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: macos-latest
+
+    steps:
+      # 0) Checkout with LFS so Unity .a archives are real binaries (not LFS pointer text files)
+      - name: Checkout (without LFS)
+        uses: actions/checkout@v4
+        with:
+          lfs: false
+          fetch-depth: 0
+
+      - name: Download libiPhone-lib.a from GitHub Release
+        run: |
+          mkdir -p Libraries
+          curl -L -o Libraries/libiPhone-lib.a \
+            https://github.com/bigtaoo/Tank-IOS/releases/download/LFS/libiPhone-lib.a
+
+      - name: Verify Unity static libs are real (not LFS pointers)
+        run: |
+          shopt -s globstar || true
+          found=0
+          bad=0
+          for f in Libraries/**/*.a Libraries/*.a; do
+            [ -f "$f" ] || continue
+            found=1
+            echo "==> $f"
+            ls -lh "$f" || true
+            file "$f" || true
+            if file "$f" | grep -qi 'text'; then
+              echo "::error ::$f looks like a Git LFS pointer (text). LFS content not downloaded."
+              bad=1
+            fi
+          done
+          if [ "$found" -eq 0 ]; then
+            echo "::warning ::No .a files found under Libraries/. If your project expects them, ensure they're committed (often via LFS)."
+          fi
+          if [ "$bad" -ne 0 ]; then
+            exit 1
+          fi
+
+      # Prefer Xcode 16.4 (iOS 18.5 SDK) if available
+      - name: Select Xcode
+        run: |
+          if [ -d "/Applications/Xcode_16.4.app" ]; then
+            sudo xcode-select -s /Applications/Xcode_16.4.app
+          else
+            sudo xcode-select -s /Applications/Xcode.app
+          fi
+          xcodebuild -version
+          xcodebuild -showsdks
+
+      # 1) Install provisioning profile (base64 of tankium.mobileprovision)
+      - name: Install provisioning profile
+        run: |
+          echo "${{ secrets.TANKIUM_MOBILEPROVISION_BASE64 }}" | base64 --decode > Tankium.mobileprovision
+          mkdir -p "$HOME/Library/MobileDevice/Provisioning Profiles"
+          UUID=$(/usr/libexec/PlistBuddy -c Print:UUID /dev/stdin <<< "$(security cms -D -i Tankium.mobileprovision)")
+          cp Tankium.mobileprovision "$HOME/Library/MobileDevice/Provisioning Profiles/$UUID.mobileprovision"
+          echo "Installed provisioning profile UUID: $UUID"
+          echo "Profile name:"
+          security cms -D -i Tankium.mobileprovision | grep -A1 "<key>Name</key>"
+
+
+      # 2) Install Apple Distribution certificate (.p12 + password)
+      - name: Install signing certificate
+        run: |
+          echo "${{ secrets.P12_BASE64 }}" | base64 --decode > dist.p12
+          security create-keychain -p github actions.keychain
+          security import dist.p12 -k "$HOME/Library/Keychains/actions.keychain" -P "${{ secrets.P12_PASSWORD }}" -T /usr/bin/codesign
+          security list-keychains -s "$HOME/Library/Keychains/actions.keychain"
+          security default-keychain -s "$HOME/Library/Keychains/actions.keychain"
+          security unlock-keychain -p github "$HOME/Library/Keychains/actions.keychain"
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k github "$HOME/Library/Keychains/actions.keychain"
+
+      # Keep keychain unlocked & show identity
+      - name: Keep keychain unlocked + verify identity
+        run: |
+          security set-keychain-settings -lut 21600 "$HOME/Library/Keychains/actions.keychain"
+          security unlock-keychain -p github "$HOME/Library/Keychains/actions.keychain"
+          echo "== Codesigning identities in actions.keychain =="
+          security find-identity -v -p codesigning "$HOME/Library/Keychains/actions.keychain" || true
+
+      # WWDR intermediate (defensive)
+      - name: Install Apple WWDR intermediate (optional)
+        run: |
+          curl -fsSL https://www.apple.com/certificateauthority/AppleWWDRCAG4.cer -o AppleWWDRCAG4.cer
+          sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain AppleWWDRCAG4.cer || true
+
+      # 3) Patch signing per target:
+      #    Unity-iPhone -> Manual + Apple Distribution + profile "tankium"
+      #    UnityFramework -> Manual + Apple Distribution, NO provisioning profile
+      - name: Patch signing per target
+        run: |
+          gem install xcodeproj --no-document
+          ruby - <<'RUBY'
+            require 'xcodeproj'
+            proj_path = 'Unity-iPhone.xcodeproj'
+            project   = Xcodeproj::Project.open(proj_path)
+
+            TEAM_ID   = 'C677KJH544'
+            PROFILE   = 'Tankium'
+            APP_ID    = 'com.taowang.tankium'
+
+            app = project.targets.find { |t| t.name == 'Unity-iPhone' }
+            fw  = project.targets.find { |t| t.name == 'UnityFramework' }
+            raise 'Unity-iPhone target not found' unless app
+            raise 'UnityFramework target not found' unless fw
+
+            app.build_configurations.each do |cfg|
+              s = cfg.build_settings
+              s['DEVELOPMENT_TEAM']               = TEAM_ID
+              s['CODE_SIGN_STYLE']                = 'Manual'
+              s['CODE_SIGN_IDENTITY']             = 'Apple Distribution'
+              s['PROVISIONING_PROFILE_SPECIFIER'] = PROFILE
+              # s['PRODUCT_BUNDLE_IDENTIFIER']       = APP_ID
+            end
+
+            fw.build_configurations.each do |cfg|
+              s = cfg.build_settings
+              s['DEVELOPMENT_TEAM']   = TEAM_ID
+              s['CODE_SIGN_STYLE']    = 'Manual'
+              s['CODE_SIGN_IDENTITY'] = 'Apple Distribution'
+              s.delete('PROVISIONING_PROFILE_SPECIFIER')
+              s.delete('PROVISIONING_PROFILE')
+            end
+
+            attrs = project.root_object.attributes['TargetAttributes'] ||= {}
+            attrs[app.uuid] ||= {}
+            attrs[app.uuid]['ProvisioningStyle'] = 'Manual'
+            attrs[fw.uuid]  ||= {}
+            attrs[fw.uuid]['ProvisioningStyle']  = 'Manual'
+
+            project.save
+          RUBY
+
+      # 3.5) Ensure NSCameraUsageDescription + set build number on the *Unity-iPhone target's* Info.plist
+      - name: Ensure NSCameraUsageDescription + bump build (correct target)
+        id: bump
+        env:
+          BUILD_NUMBER: ${{ github.run_number }}
+        run: |
+          set -e
+          # Resolve Info.plist for the *Unity-iPhone target* specifically
+          SETTINGS=$(xcodebuild -project Unity-iPhone.xcodeproj -target Unity-iPhone -configuration Release -showBuildSettings)
+          PLIST_REL=$(echo "$SETTINGS" | awk -F' = ' '/^ *INFOPLIST_FILE *=/ {print $2; exit}')
+          SRCROOT=$(echo "$SETTINGS" | awk -F' = ' '/^ *SRCROOT *=/ {print $2; exit}')
+          if [ -z "$PLIST_REL" ] || [ -z "$SRCROOT" ]; then
+            echo "::error ::Could not resolve Unity-iPhone target's INFOPLIST_FILE/SRCROOT."
+            exit 1
+          fi
+          if echo "$PLIST_REL" | grep -q '^/'; then
+            PLIST_ABS="$PLIST_REL"
+          else
+            PLIST_ABS="$SRCROOT/$PLIST_REL"
+          fi
+          if [ ! -f "$PLIST_ABS" ]; then
+            echo "::error ::Resolved Info.plist does not exist: $PLIST_ABS"
+            exit 1
+          fi
+          echo "Using Unity-iPhone Info.plist at: $PLIST_ABS"
+
+          # Tell App Store Connect we do NOT use non-exempt encryption
+          /usr/libexec/PlistBuddy -c "Delete :ITSAppUsesNonExemptEncryption" "$PLIST_ABS" >/dev/null 2>&1 || true
+          /usr/libexec/PlistBuddy -c "Add :ITSAppUsesNonExemptEncryption bool false" "$PLIST_ABS"
+
+          # Add/replace NSCameraUsageDescription
+          /usr/libexec/PlistBuddy -c "Delete :NSCameraUsageDescription" "$PLIST_ABS" >/dev/null 2>&1 || true
+          /usr/libexec/PlistBuddy -c "Add :NSCameraUsageDescription string Camera access is used only for optional features (e.g., capturing photos/video if you choose)." "$PLIST_ABS"
+
+          # Ensure CFBundleShortVersionString exists (keep current if present)
+          EXIST_VER=$(/usr/libexec/PlistBuddy -c "Print :CFBundleShortVersionString" "$PLIST_ABS" 2>/dev/null || true)
+          if [ -z "$EXIST_VER" ]; then
+            /usr/libexec/PlistBuddy -c "Add :CFBundleShortVersionString string 1.0" "$PLIST_ABS"
+          fi
+
+          # Build number: must strictly increase; use GitHub run number or timestamp fallback
+          BN="${BUILD_NUMBER:-1}"
+          if [ -z "$BN" ] || ! [[ "$BN" =~ ^[0-9]+$ ]]; then
+            BN=$(date +%Y%m%d%H%M)
+          fi
+          /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $BN" "$PLIST_ABS" || /usr/libexec/PlistBuddy -c "Add :CFBundleVersion string $BN" "$PLIST_ABS"
+
+          echo "bundle_version=$BN" >> "$GITHUB_OUTPUT"
+          echo "CFBundleShortVersionString: $(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "$PLIST_ABS")"
+          echo "CFBundleVersion:            $(/usr/libexec/PlistBuddy -c 'Print :CFBundleVersion'            "$PLIST_ABS")"
+
+      # 4) Show effective signing (sanity)
+      - name: Show signing (Unity-iPhone)
+        run: |
+          xcodebuild -project Unity-iPhone.xcodeproj -target Unity-iPhone -showBuildSettings \
+          | egrep -i 'CODE_SIGN|PROVISION|DEVELOPMENT_TEAM|PRODUCT_BUNDLE_IDENTIFIER' || true
+      - name: Show signing (UnityFramework)
+        run: |
+          xcodebuild -project Unity-iPhone.xcodeproj -target UnityFramework -showBuildSettings \
+          | egrep -i 'CODE_SIGN|PROVISION|DEVELOPMENT_TEAM|PRODUCT_BUNDLE_IDENTIFIER' || true
+
+      # 5) Archive (force codesign to our keychain; also pass CURRENT_PROJECT_VERSION to ensure Xcode uses BN)
+      - name: Archive
+        run: |
+          xcodebuild \
+            -workspace Unity-iPhone.xcworkspace \
+            -scheme Unity-iPhone \
+            -configuration Release \
+            -sdk iphoneos \
+            -archivePath "$PWD/build/TankIOS.xcarchive" \
+            archive \
+            CURRENT_PROJECT_VERSION="${{ steps.bump.outputs.bundle_version }}" \
+            OTHER_CODE_SIGN_FLAGS="--keychain $HOME/Library/Keychains/actions.keychain --timestamp=none" \
+            COMPILER_INDEX_STORE_ENABLE=NO
+
+      # 6) Export IPA
+      - name: Export IPA
+        run: |
+          xcodebuild \
+            -exportArchive \
+            -archivePath "$PWD/build/TankIOS.xcarchive" \
+            -exportOptionsPlist ExportOptions.plist \
+            -exportPath "$PWD/build/output" \
+            OTHER_CODE_SIGN_FLAGS="--keychain $HOME/Library/Keychains/actions.keychain --timestamp=none"
+
+      # 6.1) List output
+      - name: List export folder
+        run: |
+          echo "== build/output contents =="
+          ls -lah build/output || true
+          echo "== build tree =="
+          find build -maxdepth 2 -type f | sed 's/^/  /'
+
+      # 6.2) Locate IPA
+      - name: Locate IPA
+        id: locate_ipa
+        run: |
+          set -e
+          IPA=$(ls -1 build/output/*.ipa 2>/dev/null | head -n 1 || true)
+          if [ -z "$IPA" ]; then
+            echo "::error ::No .ipa found in build/output/"
+            exit 1
+          fi
+          echo "Found IPA: $IPA"
+          echo "ipa_path=$IPA" >> "$GITHUB_OUTPUT"
+
+      # 6.3) Verify IPA's Info.plist actually contains the new build number (pre-flight check)
+      - name: Verify IPA Info.plist
+        run: |
+          set -e
+          TMPDIR=$(mktemp -d)
+          unzip -q "${{ steps.locate_ipa.outputs.ipa_path }}" -d "$TMPDIR"
+          APP_PLIST=$(find "$TMPDIR/Payload" -name Info.plist -maxdepth 2 | head -n 1)
+          if [ -z "$APP_PLIST" ] || [ ! -f "$APP_PLIST" ]; then
+            echo "::error ::Could not find Info.plist inside IPA"
+            exit 1
+          fi
+          echo "IPA Info.plist path: $APP_PLIST"
+          echo "IPA CFBundleShortVersionString: $(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "$APP_PLIST" 2>/dev/null || echo MISSING)"
+          echo "IPA CFBundleVersion:            $(/usr/libexec/PlistBuddy -c 'Print :CFBundleVersion' "$APP_PLIST" 2>/dev/null || echo MISSING)"
+          # Fail early if build number didn't propagate
+          IPA_BN=$(/usr/libexec/PlistBuddy -c 'Print :CFBundleVersion' "$APP_PLIST" 2>/dev/null || echo "")
+          if [ -z "$IPA_BN" ] || [ "$IPA_BN" = "0" ]; then
+            echo "::error ::IPA CFBundleVersion is '$IPA_BN' (must be > 0)."
+            exit 1
+          fi
+
+      # 7) Upload to TestFlight (API key)
+      - name: Upload to TestFlight
+        uses: apple-actions/upload-testflight-build@v1
+        with:
+          app-path: ${{ steps.locate_ipa.outputs.ipa_path }}
+          issuer-id: ${{ secrets.APP_STORE_ISSUER_ID }}
+          api-key-id: ${{ secrets.APP_STORE_KEY_ID }}
+          api-private-key: ${{ secrets.APP_STORE_API_KEY }}
+
+      # 8) Keep IPA as artifact
+      - name: Upload IPA artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Tank-iOS-IPA
+          path: ${{ steps.locate_ipa.outputs.ipa_path }}
