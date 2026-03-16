@@ -27,10 +27,7 @@ public class GamePanel : MonoBehaviour
         Effect.Initialize(InitialEffect);
 
         DrawNumbers();
-        var headImage = GameNumbers.GetNumberImage(Config.Target);
-        InitialTarget.sprite = headImage.sprite;
-        // InitialTarget.SetNativeSize();
-        headImage.gameObject.SetActive(false);
+        Header.Initialize(InitialTarget);
     }
 
     // Update is called once per frame
@@ -43,10 +40,7 @@ public class GamePanel : MonoBehaviour
     {
         Config.NextLevel();
         DrawNumbers();
-        var headImage = GameNumbers.GetNumberImage(Config.Target);
-        InitialTarget.sprite = headImage.sprite;
-        // InitialTarget.SetNativeSize();
-        headImage.gameObject.SetActive(false);
+        Header.UpdateHeader();
         GameResult.gameObject.SetActive(false);
     }
 
