@@ -24,6 +24,10 @@ public static class Config
     public static void NextLevel()
     {
         Target++;
+        if (Target >= 99)
+        {
+            Target = 99;
+        }
         PlayerPrefs.SetInt(TargetNumberKey, Target);
         SetGameData();
     }
