@@ -37,11 +37,16 @@ jobs:
           buildName: SumQuest
           buildsPath: ${{ env.BUILD_PATH }}
 
+      - name: Show build structure
+        run: ls -R ${{ env.BUILD_PATH }}
+
       # 4️⃣ Set automatic build number for TestFlight
       - name: Set automatic build number
         run: |
-          cd ${{ env.BUILD_PATH }}
-          agvtool new-version -all ${{ github.run_number }}
+          BUILD_NUMBER=${{ github.run_number }}
+          INFO_PLIST=$(find ${{ env.BUILD_PATH }} -name Info.plist | head -n 1)
+          echo "Found Info.plist at: $INFO_PLIST"
+          /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $BUILD_NUMBER" "$INFO_PLIST"
 
       # 5️⃣ Install distribution certificate
       - name: Install certificate
