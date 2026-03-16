@@ -6,16 +6,18 @@ on:
 jobs:
   build-ios:
     runs-on: macos-latest
+
     env:
-      PROJECT_PATH: SumQuest           # Unity project folder
-      BUILD_PATH: build/ios            # Xcode build output
+      PROJECT_PATH: SumQuest
+      BUILD_PATH: build/ios
+      IOS_PROJECT_PATH: build/ios/iOS/SumQuest
 
     steps:
-      # 1️⃣ Checkout repo
+      # 1️⃣ Checkout repository
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # 2️⃣ Cache Unity Library for faster builds
+      # 2️⃣ Cache Unity Library
       - name: Cache Unity Library
         uses: actions/cache@v3
         with:
@@ -24,7 +26,7 @@ jobs:
           restore-keys: |
             Library-
 
-      # 3️⃣ Build Unity iOS Project (Personal license via account login)
+      # 3️⃣ Build Unity iOS project
       - name: Build Unity iOS Project
         uses: game-ci/unity-builder@v4
         env:
@@ -40,13 +42,13 @@ jobs:
       - name: Show build structure
         run: ls -R ${{ env.BUILD_PATH }}
 
-      # 4️⃣ Set automatic build number for TestFlight
+      # 4️⃣ Set automatic build number
       - name: Set automatic build number
         run: |
           BUILD_NUMBER=${{ github.run_number }}
-          INFO_PLIST=$(find ${{ env.BUILD_PATH }} -name Info.plist | head -n 1)
-          echo "Found Info.plist at: $INFO_PLIST"
-          /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $BUILD_NUMBER" "$INFO_PLIST"
+          /usr/libexec/PlistBuddy \
+            -c "Set :CFBundleVersion $BUILD_NUMBER" \
+            ${{ env.IOS_PROJECT_PATH }}/Info.plist
 
       # 5️⃣ Install distribution certificate
       - name: Install certificate
@@ -71,40 +73,41 @@ jobs:
       # 7️⃣ Build IPA using Xcode
       - name: Build IPA
         run: |
-          cd ${{ env.BUILD_PATH }}
+          cd ${{ env.IOS_PROJECT_PATH }}
 
-          # Archive
           xcodebuild \
+            -project Unity-iPhone.xcodeproj \
             -scheme Unity-iPhone \
             -configuration Release \
             -archivePath build.xcarchive \
             archive
 
-          # Export IPA
           xcodebuild \
             -exportArchive \
             -archivePath build.xcarchive \
             -exportOptionsPlist ${{ github.workspace }}/SumQuest/ExportOptions.plist \
             -exportPath build
 
-      # 8️⃣ Upload to TestFlight via App Store Connect API
+      # 8️⃣ Upload to TestFlight
       - name: Upload to TestFlight
         env:
           APPSTORE_API_KEY_ID: ${{ secrets.APPSTORE_API_KEY_ID }}
           APPSTORE_ISSUER_ID: ${{ secrets.APPSTORE_ISSUER_ID }}
           APPSTORE_API_KEY: ${{ secrets.APPSTORE_API_KEY }}
         run: |
+          IPA_PATH=$(find ${{ env.BUILD_PATH }} -name "*.ipa" | head -n 1)
+
           mkdir private_keys
           echo "$APPSTORE_API_KEY" > private_keys/AuthKey_${APPSTORE_API_KEY_ID}.p8
 
           xcrun altool \
             --upload-app \
             --type ios \
-            --file ${{ env.BUILD_PATH }}/build/*.ipa \
+            --file "$IPA_PATH" \
             --apiKey $APPSTORE_API_KEY_ID \
             --apiIssuer $APPSTORE_ISSUER_ID
 
-      # 9️⃣ Return Unity License (Personal account token release)
+      # 9️⃣ Return Unity license
       - name: Return Unity License
         if: always()
         uses: game-ci/unity-return-license@v2
