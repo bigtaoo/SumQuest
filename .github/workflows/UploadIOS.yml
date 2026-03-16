@@ -33,6 +33,7 @@ jobs:
         with:
           projectPath: ${{ env.PROJECT_PATH }}
           targetPlatform: iOS
+          personal: true       # tells builder it's Personal edition
           buildName: SumQuest
           buildPath: ${{ env.BUILD_PATH }}
 
