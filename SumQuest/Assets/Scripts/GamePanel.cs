@@ -10,9 +10,7 @@ public class GamePanel : MonoBehaviour
     [SerializeField] private List<Image> InitialImages;
     [SerializeField] private GameObject GameResult;
     [SerializeField] private Button Next;
-
-    private int Select;
-    private int LeftNumberCount;
+    
     private Dictionary<int, int> Numbers = new();
     private Dictionary<int, Button> Buttons = new();
     
@@ -23,7 +21,7 @@ public class GamePanel : MonoBehaviour
         Config.Width = 5;
         Config.Height = 6;
         Config.Target = 6;
-        Select = -1;
+        Config.Select = -1;
         InitialNumber.gameObject.SetActive(false);      
         GameResult.gameObject.SetActive(false);
         Next.onClick.AddListener(() => NextLevel());
@@ -49,7 +47,7 @@ public class GamePanel : MonoBehaviour
         Config.Width = 5;
         Config.Height = 6;
         Config.Target++;
-        Select = -1;
+        Config.Select = -1;
         DrawNumbers();
         var headImage = GameNumbers.GetNumberImage(Config.Target);
         InitialTarget.sprite = headImage.sprite;
@@ -61,7 +59,7 @@ public class GamePanel : MonoBehaviour
     private void DrawNumbers()
     {
         var startPosition = InitialNumber.transform.position;
-        var randomNumbers = InitializeNumbers();
+        var randomNumbers = Config.InitializeNumbers();
         var numberIndex = 0;
         for (int i = 0; i < Config.Width; ++i)
         {
@@ -98,56 +96,41 @@ public class GamePanel : MonoBehaviour
         return GameObject.Instantiate(InitialNumber);
     }
 
-    private List<int> InitializeNumbers()
-    {
-        LeftNumberCount = Config.Width * Config.Height;
-        var randomNumbers = new List<int>();
-        for (int i = 0; i < LeftNumberCount; i+=2)
-        {
-            int a = Random.Range(1, Config.Target - 1);
-            int b = Config.Target - a;
-            randomNumbers.Add(a);
-            randomNumbers.Add(b);
-        }
-        Helper.Shuffle(randomNumbers);
-        return randomNumbers;
-    }
-
     private void OnButtonClick(int index)
     {
         Debug.Log($"Click index: {index}");
 
-        if (Select == -1)
+        if (Config.Select == -1)
         {
-            Select = index;
+            Config.Select = index;
             GameNumbers.DrawSelect(index, Buttons[index].transform.position);
             return;
         }
-        if (Select == index)
+        if (Config.Select == index)
         {
-            Select = -1;
+            Config.Select = -1;
             GameNumbers.HideSelect();
             return;
         }
-        if (Numbers[Select] + Numbers[index] == Config.Target)
+        if (Numbers[Config.Select] + Numbers[index] == Config.Target)
         {
-            Buttons[Select].gameObject.SetActive(false);
-            Buttons[Select].onClick.RemoveAllListeners();
+            Buttons[Config.Select].gameObject.SetActive(false);
+            Buttons[Config.Select].onClick.RemoveAllListeners();
             Buttons[index].gameObject.SetActive(false);
             Buttons[index].onClick.RemoveAllListeners();
-            GameNumbers.HideNumer(Select);
+            GameNumbers.HideNumer(Config.Select);
             GameNumbers.HideNumer(index);
-            Effect.Play(Buttons[Select].transform.position, Buttons[index].transform.position);
-            Select = -1;
+            Effect.Play(Buttons[Config.Select].transform.position, Buttons[index].transform.position);
+            Config.Select = -1;
             GameNumbers.HideSelect();           
-            LeftNumberCount -= 2;
-            if (LeftNumberCount <= 0)
+            Config.LeftNumberCount -= 2;
+            if (Config.LeftNumberCount <= 0)
             {
                 GameResult.gameObject.SetActive(true);
             }
             return;
         }
-        Select = index;
+        Config.Select = index;
         GameNumbers.DrawSelect(index, Buttons[index].transform.position);
     }  
 }
