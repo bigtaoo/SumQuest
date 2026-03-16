@@ -1,20 +1,21 @@
-name: iOS Build & Upload TestFlight
+name: iOS Build & TestFlight
 
 on:
   workflow_dispatch:
 
 jobs:
-  build:
+  build-ios:
     runs-on: macos-latest
-
     env:
-      PROJECT_PATH: SumQuest
-      BUILD_PATH: build/ios
+      PROJECT_PATH: SumQuest           # Unity project folder
+      BUILD_PATH: build/ios            # Xcode build output
 
     steps:
+      # 1️⃣ Checkout repo
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      # 2️⃣ Cache Unity Library for faster builds
       - name: Cache Unity Library
         uses: actions/cache@v3
         with:
@@ -23,24 +24,26 @@ jobs:
           restore-keys: |
             Library-
 
-      - name: Build Unity iOS
+      # 3️⃣ Build Unity iOS Project (Personal license via account login)
+      - name: Build Unity iOS Project
         uses: game-ci/unity-builder@v4
         env:
           UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
           UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
-          UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
         with:
           projectPath: ${{ env.PROJECT_PATH }}
           targetPlatform: iOS
           buildName: SumQuest
           buildPath: ${{ env.BUILD_PATH }}
 
+      # 4️⃣ Set automatic build number for TestFlight
       - name: Set automatic build number
         run: |
           BUILD_NUMBER=${{ github.run_number }}
           /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $BUILD_NUMBER" \
           ${{ env.BUILD_PATH }}/Info.plist
 
+      # 5️⃣ Install distribution certificate
       - name: Install certificate
         env:
           CERTIFICATE_BASE64: ${{ secrets.IOS_DISTRIBUTION_CERT }}
@@ -51,6 +54,7 @@ jobs:
           security import cert.p12 -k build.keychain -P "$CERTIFICATE_PASSWORD" -T /usr/bin/codesign
           security list-keychains -s build.keychain
 
+      # 6️⃣ Install provisioning profile
       - name: Install provisioning profile
         env:
           PROFILE_BASE64: ${{ secrets.IOS_PROVISIONING_PROFILE }}
@@ -59,22 +63,26 @@ jobs:
           echo $PROFILE_BASE64 | base64 --decode > profile.mobileprovision
           cp profile.mobileprovision ~/Library/MobileDevice/Provisioning\ Profiles/
 
+      # 7️⃣ Build IPA using Xcode
       - name: Build IPA
         run: |
           cd ${{ env.BUILD_PATH }}
 
+          # Archive
           xcodebuild \
-          -scheme Unity-iPhone \
-          -configuration Release \
-          -archivePath build.xcarchive \
-          archive
+            -scheme Unity-iPhone \
+            -configuration Release \
+            -archivePath build.xcarchive \
+            archive
 
+          # Export IPA
           xcodebuild \
-          -exportArchive \
-          -archivePath build.xcarchive \
-          -exportOptionsPlist ${{ github.workspace }}/SumQuest/ExportOptions.plist \
-          -exportPath build
+            -exportArchive \
+            -archivePath build.xcarchive \
+            -exportOptionsPlist ${{ github.workspace }}/SumQuest/ExportOptions.plist \
+            -exportPath build
 
+      # 8️⃣ Upload to TestFlight via App Store Connect API
       - name: Upload to TestFlight
         env:
           APPSTORE_API_KEY_ID: ${{ secrets.APPSTORE_API_KEY_ID }}
@@ -90,3 +98,8 @@ jobs:
             --file ${{ env.BUILD_PATH }}/build/*.ipa \
             --apiKey $APPSTORE_API_KEY_ID \
             --apiIssuer $APPSTORE_ISSUER_ID
+
+      # 9️⃣ Return Unity License (Personal account token release)
+      - name: Return Unity License
+        if: always()
+        uses: game-ci/unity-return-license@v2
