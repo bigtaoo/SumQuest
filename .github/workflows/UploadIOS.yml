@@ -40,9 +40,8 @@ jobs:
       # 4️⃣ Set automatic build number for TestFlight
       - name: Set automatic build number
         run: |
-          BUILD_NUMBER=${{ github.run_number }}
-          /usr/libexec/PlistBuddy -c "Set :CFBundleVersion $BUILD_NUMBER" \
-          ${{ env.BUILD_PATH }}/Info.plist
+          cd ${{ env.BUILD_PATH }}
+          agvtool new-version -all ${{ github.run_number }}
 
       # 5️⃣ Install distribution certificate
       - name: Install certificate

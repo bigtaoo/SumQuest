@@ -5,6 +5,13 @@
 <dict>
   <key>method</key>
   <string>app-store</string>
+  <key>teamID</key>
+  <string>C677KJH544</string>
+  <key>provisioningProfiles</key>
+  <dict>
+      <key>com.taowang.sumquest</key>
+      <string>SumQuest</string>
+  </dict>
   <key>uploadBitcode</key>
   <false/>
   <key>compileBitcode</key>
