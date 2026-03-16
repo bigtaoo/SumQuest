@@ -9,6 +9,7 @@ public static class Config
     public static int ButtonWidth { get; private set; }
     public static int ButtonHeight { get; private set; }
     public static int ButtonPadding { get; private set; }
+    public static int NumberImageSize { get; private set; }
     public static int LeftNumberCount { get; set; }
     public static int Select { get; set; }
 
@@ -55,5 +56,6 @@ public static class Config
         ButtonHeight = 150;
         ButtonWidth = 150;
         ButtonPadding = 10;
+        NumberImageSize = 80;
     }
 }

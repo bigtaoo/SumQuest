@@ -7,7 +7,7 @@ public static class GameNumbers
 {
     private static Dictionary<ImageType, Image> Images = new();
     private static Dictionary<ImageType, List<Image>> AllImages = new();
-    private static Dictionary<int, Image> Numbers = new();
+    private static Dictionary<int, List<Image>> Numbers = new();
 
     public static void Initialize(List<Image> numberImages)
     {
@@ -79,14 +79,37 @@ public static class GameNumbers
 
     public static void DrawNumber(int index, int number, Vector3 position)
     {
-        var numImage = GetNumberImage(number);
-        numImage.transform.position = position;
-        Numbers[index] = numImage;
+        if (!Numbers.TryGetValue(index, out _))
+        {
+            Numbers.Add(index, new List<Image>());
+        }
+        if (number < 10)
+        {
+            var numImage = GetNumberImage(number);
+            numImage.transform.position = position;
+            Numbers[index].Add(numImage);
+        }
+        else if (number >= 10 && number <= 99)
+        {
+            var ten = number / 10;
+            var digit = number % 10;
+
+            var numImage = GetNumberImage(ten);
+            numImage.transform.position = new Vector3(position.x - Config.NumberImageSize / 2, position.y, position.z);
+            Numbers[index].Add(numImage);
+            numImage = GetNumberImage(digit);
+            numImage.transform.position = new Vector3(position.x + Config.NumberImageSize / 2, position.y, position.z);
+            Numbers[index].Add(numImage);
+        }
     }
 
     public static void HideNumer(int index)
     {
-        Numbers[index].gameObject.SetActive(false);
+        foreach (var image in Numbers[index])
+        {
+            image.gameObject.SetActive(false);
+        }
+        Numbers[index].Clear();
     }
 
     public static void DrawSelect(int index, Vector3 position)
