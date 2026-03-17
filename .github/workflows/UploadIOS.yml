@@ -39,8 +39,8 @@ jobs:
           buildName: SumQuest
           buildsPath: ${{ env.BUILD_PATH }}
 
-      - name: Show build structure
-        run: ls -R ${{ env.BUILD_PATH }}
+      #- name: Show build structure
+       # run: ls -R ${{ env.BUILD_PATH }}
 
       # 4️⃣ Set automatic build number
       - name: Set automatic build number
@@ -71,17 +71,19 @@ jobs:
           UUID=$(grep -a -E -o "UUID.*" profile.mobileprovision | head -1 | sed 's/.*<string>\(.*\)<\/string>.*/\1/')
           cp profile.mobileprovision ~/Library/MobileDevice/Provisioning\ Profiles/$UUID.mobileprovision
 
+      - name: Check provisioning profile
+        run: |
+          security find-identity -v -p codesigning
+          security cms -D -i profile.mobileprovision | grep -A2 "Name"
+          security cms -D -i profile.mobileprovision | grep -A5 Entitlements
+
       # 7️⃣ Build IPA using Xcode
       - name: Build IPA
         env:
           TEAM_ID: C677KJH544
         run: |
           cd ${{ env.IOS_PROJECT_PATH }}
-
-          security find-identity -v -p codesigning
-          security cms -D -i profile.mobileprovision | grep -A2 "Name"
-          security cms -D -i profile.mobileprovision | grep -A5 Entitlements
-
+         
           xcodebuild \
             -project Unity-iPhone.xcodeproj \
             -scheme Unity-iPhone \
