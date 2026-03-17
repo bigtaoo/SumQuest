@@ -176,7 +176,7 @@ jobs:
           cd ${{ env.IOS_PROJECT_PATH }}
 
           xcodebuild \
-            -workspace Unity-iPhone.xcworkspace \
+            -project Unity-iPhone.xcodeproj \
             -scheme Unity-iPhone \
             -configuration Release \
             -sdk iphoneos \
