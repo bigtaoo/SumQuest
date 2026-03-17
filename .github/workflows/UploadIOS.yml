@@ -78,6 +78,63 @@ jobs:
           security cms -D -i profile.mobileprovision | grep -A2 "Name"
           security cms -D -i profile.mobileprovision | grep -A5 Entitlements
 
+      # Patch signing per target:
+      # Unity-iPhone -> Manual + Apple Distribution + profile "tankium"
+      # UnityFramework -> Manual + Apple Distribution, NO provisioning profile
+      - name: Patch signing per target
+        run: |
+          gem install xcodeproj --no-document
+          ruby - <<'RUBY'
+            require 'xcodeproj'
+            proj_path = 'Unity-iPhone.xcodeproj'
+            project   = Xcodeproj::Project.open(proj_path)
+
+            TEAM_ID   = 'C677KJH544'
+            PROFILE   = 'sumquest'
+            APP_ID    = 'com.taowang.sumquest'
+
+            app = project.targets.find { |t| t.name == 'Unity-iPhone' }
+            fw  = project.targets.find { |t| t.name == 'UnityFramework' }
+            raise 'Unity-iPhone target not found' unless app
+            raise 'UnityFramework target not found' unless fw
+
+            app.build_configurations.each do |cfg|
+              s = cfg.build_settings
+              s['DEVELOPMENT_TEAM']               = TEAM_ID
+              s['CODE_SIGN_STYLE']                = 'Manual'
+              s['CODE_SIGN_IDENTITY']             = 'Apple Distribution'
+              s['PROVISIONING_PROFILE_SPECIFIER'] = PROFILE
+              # s['PRODUCT_BUNDLE_IDENTIFIER']       = APP_ID
+            end
+
+            fw.build_configurations.each do |cfg|
+              s = cfg.build_settings
+              s['DEVELOPMENT_TEAM']   = TEAM_ID
+              s['CODE_SIGN_STYLE']    = 'Manual'
+              s['CODE_SIGN_IDENTITY'] = 'Apple Distribution'
+              s.delete('PROVISIONING_PROFILE_SPECIFIER')
+              s.delete('PROVISIONING_PROFILE')
+            end
+
+            attrs = project.root_object.attributes['TargetAttributes'] ||= {}
+            attrs[app.uuid] ||= {}
+            attrs[app.uuid]['ProvisioningStyle'] = 'Manual'
+            attrs[fw.uuid]  ||= {}
+            attrs[fw.uuid]['ProvisioningStyle']  = 'Manual'
+
+            project.save
+          RUBY
+
+      # Show effective signing (sanity)
+      - name: Show signing (Unity-iPhone)
+        run: |
+          xcodebuild -project Unity-iPhone.xcodeproj -target Unity-iPhone -showBuildSettings \
+          | egrep -i 'CODE_SIGN|PROVISION|DEVELOPMENT_TEAM|PRODUCT_BUNDLE_IDENTIFIER' || true
+      - name: Show signing (UnityFramework)
+        run: |
+          xcodebuild -project Unity-iPhone.xcodeproj -target UnityFramework -showBuildSettings \
+          | egrep -i 'CODE_SIGN|PROVISION|DEVELOPMENT_TEAM|PRODUCT_BUNDLE_IDENTIFIER' || true
+
       # Build IPA using Xcode
       - name: Build IPA
         env:
@@ -86,19 +143,14 @@ jobs:
           cd ${{ env.IOS_PROJECT_PATH }}
          
           xcodebuild \
-            -project Unity-iPhone.xcodeproj \
+            -project Unity-iPhone.xcworkspace \
             -scheme Unity-iPhone \
             -configuration Release \
             -archivePath build.xcarchive \
             -sdk iphoneos \
-            CODE_SIGN_STYLE=Manual \
-            DEVELOPMENT_TEAM=$TEAM_ID \
-            PRODUCT_BUNDLE_IDENTIFIER=com.taowang.sumquest \
-            PROVISIONING_PROFILE_SPECIFIER="sumquest" \
-            CODE_SIGN_IDENTITY="Apple Distribution" \
-            OTHER_CFLAGS="-v" \
-            VERBOSE_BUILD=YES \
             archive
+            OTHER_CODE_SIGN_FLAGS="--keychain $HOME/Library/Keychains/actions.keychain --timestamp=none" \
+            COMPILER_INDEX_STORE_ENABLE=NO
 
           xcodebuild \
             -exportArchive \
