@@ -55,14 +55,14 @@ public static class Config
     private static void SetGameData()
     {
         Select = -1;
-        ButtonPadding = 10;
-        NumberImageSize = 80;
+        ButtonPadding = 10;      
         if (Target > 0 && Target <= 20)
         {
             Width = 5;
             Height = 6;
             ButtonHeight = 150;
             ButtonWidth = 150;
+            NumberImageSize = 80;
         }
         else if (Target > 20 && Target <= 50)
         {
@@ -70,6 +70,7 @@ public static class Config
             Height = 7;
             ButtonHeight = 130;
             ButtonWidth = 130;
+            NumberImageSize = 70;
         }
         else
         {
@@ -78,6 +79,7 @@ public static class Config
             ButtonHeight = 100;
             ButtonWidth = 100;
             NumberImageSize = 60;
+            ButtonPadding = 5;
         }
     }
 }

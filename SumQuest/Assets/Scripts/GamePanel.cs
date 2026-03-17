@@ -54,6 +54,7 @@ public class GamePanel : MonoBehaviour
             for (int j = 0; j < Config.Height; ++j)
             {
                 var button = GetButtonObject();
+                button.GetComponent<RectTransform>().sizeDelta = new Vector2(Config.ButtonWidth, Config.ButtonHeight);
                 button.transform.position = 
                     new Vector3(startPosition.x + (Config.ButtonWidth + Config.ButtonPadding) * i, 
                     startPosition.y - (Config.ButtonHeight + Config.ButtonPadding) * j, startPosition.z);
