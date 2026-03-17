@@ -96,6 +96,8 @@ jobs:
             PRODUCT_BUNDLE_IDENTIFIER=com.taowang.sumquest \
             PROVISIONING_PROFILE_SPECIFIER="sumquest" \
             CODE_SIGN_IDENTITY="Apple Distribution" \
+            OTHER_CFLAGS="-v" \
+            VERBOSE_BUILD=YES \
             archive
 
           xcodebuild \
