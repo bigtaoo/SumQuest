@@ -244,8 +244,17 @@ jobs:
 
           IPA_PATH=${{ steps.locate_ipa.outputs.ipa_path }}
 
-          mkdir private_keys
-          echo "$APPSTORE_API_KEY" > private_keys/AuthKey_${APPSTORE_API_KEY_ID}.p8
+          mkdir -p ~/.appstoreconnect/private_keys
+          echo "$APPSTORE_API_KEY" > ~/.appstoreconnect/private_keys/AuthKey_${APPSTORE_API_KEY_ID}.p8
+
+          echo "IPA path: $IPA_PATH"
+          ls -l "$IPA_PATH"
+
+          echo "Check API key file:"
+          ls -l ~/.appstoreconnect/private_keys/
+
+          echo "Print first lines of key (sanity):"
+          head -n 2 ~/.appstoreconnect/private_keys/AuthKey_${APPSTORE_API_KEY_ID}.p8
 
           xcrun altool \
             --upload-app \
