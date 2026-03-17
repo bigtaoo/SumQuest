@@ -13,9 +13,36 @@ jobs:
       IOS_PROJECT_PATH: build/ios/iOS/SumQuest
 
     steps:
-      # 1️⃣ Checkout repository
+      # Checkout repository
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      # Install distribution certificate
+      - name: Install certificate
+        env:
+          CERTIFICATE_BASE64: ${{ secrets.IOS_DISTRIBUTION_CERT }}
+          CERTIFICATE_PASSWORD: ${{ secrets.IOS_CERT_PASSWORD }}
+        run: |
+          echo $CERTIFICATE_BASE64 | base64 --decode > cert.p12
+          security create-keychain -p "" build.keychain
+          security import cert.p12 -k build.keychain -P "$CERTIFICATE_PASSWORD" -T /usr/bin/codesign
+          security list-keychains -s build.keychain
+
+      # Install provisioning profile
+      - name: Install provisioning profile
+        env:
+          PROFILE_BASE64: ${{ secrets.IOS_PROVISIONING_PROFILE }}
+        run: |
+          echo "$PROFILE_BASE64" | base64 --decode > profile.mobileprovision
+          mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
+          UUID=$(grep -a -E -o "UUID.*" profile.mobileprovision | head -1 | sed 's/.*<string>\(.*\)<\/string>.*/\1/')
+          cp profile.mobileprovision ~/Library/MobileDevice/Provisioning\ Profiles/$UUID.mobileprovision
+
+      - name: Check provisioning profile
+        run: |
+          security find-identity -v -p codesigning
+          security cms -D -i profile.mobileprovision | grep -A2 "Name"
+          security cms -D -i profile.mobileprovision | grep -A5 Entitlements
 
       # 2️⃣ Cache Unity Library
       - name: Cache Unity Library
@@ -50,32 +77,6 @@ jobs:
             -c "Set :CFBundleVersion $BUILD_NUMBER" \
             ${{ env.IOS_PROJECT_PATH }}/Info.plist
 
-      # 5️⃣ Install distribution certificate
-      - name: Install certificate
-        env:
-          CERTIFICATE_BASE64: ${{ secrets.IOS_DISTRIBUTION_CERT }}
-          CERTIFICATE_PASSWORD: ${{ secrets.IOS_CERT_PASSWORD }}
-        run: |
-          echo $CERTIFICATE_BASE64 | base64 --decode > cert.p12
-          security create-keychain -p "" build.keychain
-          security import cert.p12 -k build.keychain -P "$CERTIFICATE_PASSWORD" -T /usr/bin/codesign
-          security list-keychains -s build.keychain
-
-      # 6️⃣ Install provisioning profile
-      - name: Install provisioning profile
-        env:
-          PROFILE_BASE64: ${{ secrets.IOS_PROVISIONING_PROFILE }}
-        run: |
-          echo "$IOS_PROVISIONING_PROFILE" | base64 --decode > profile.mobileprovision
-          mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
-          UUID=$(grep -a -E -o "UUID.*" profile.mobileprovision | head -1 | sed 's/.*<string>\(.*\)<\/string>.*/\1/')
-          cp profile.mobileprovision ~/Library/MobileDevice/Provisioning\ Profiles/$UUID.mobileprovision
-
-      - name: Check provisioning profile
-        run: |
-          security find-identity -v -p codesigning
-          security cms -D -i profile.mobileprovision | grep -A2 "Name"
-          security cms -D -i profile.mobileprovision | grep -A5 Entitlements
 
       # 7️⃣ Build IPA using Xcode
       - name: Build IPA
