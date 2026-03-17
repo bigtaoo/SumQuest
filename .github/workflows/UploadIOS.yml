@@ -72,6 +72,8 @@ jobs:
 
       # 7️⃣ Build IPA using Xcode
       - name: Build IPA
+        env:
+          TEAM_ID: C677KJH544
         run: |
           cd ${{ env.IOS_PROJECT_PATH }}
 
@@ -80,6 +82,10 @@ jobs:
             -scheme Unity-iPhone \
             -configuration Release \
             -archivePath build.xcarchive \
+            -sdk iphoneos \
+            CODE_SIGN_STYLE=Manual \
+            DEVELOPMENT_TEAM=$TEAM_ID \
+            PRODUCT_BUNDLE_IDENTIFIER=com.taowang.sumquest \
             archive
 
           xcodebuild \
