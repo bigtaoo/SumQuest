@@ -17,17 +17,17 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Test API Key
-        run: |
-          mkdir -p ~/.appstoreconnect/private_keys
-          echo "${{ secrets.APPSTORE_API_KEY }}" | sed 's/\\n/\n/g' > ~/.appstoreconnect/private_keys/AuthKey_${{ secrets.APPSTORE_API_KEY_ID }}.p8
+      # - name: Test API Key
+      #   run: |
+      #     mkdir -p ~/.appstoreconnect/private_keys
+      #     echo "${{ secrets.APPSTORE_API_KEY }}" | sed 's/\\n/\n/g' > ~/.appstoreconnect/private_keys/AuthKey_${{ secrets.APPSTORE_API_KEY_ID }}.p8
 
-          xcrun altool \
-            --list-providers \
-            --apiKey ${{ secrets.APPSTORE_API_KEY_ID }} \
-            --apiIssuer ${{ secrets.APPSTORE_ISSUER_ID }}
+      #     xcrun altool \
+      #       --list-providers \
+      #       --apiKey ${{ secrets.APPSTORE_API_KEY_ID }} \
+      #       --apiIssuer ${{ secrets.APPSTORE_ISSUER_ID }}
 
-      # 2️⃣ Cache Unity Library
+      # Cache Unity Library
       - name: Cache Unity Library
         uses: actions/cache@v3
         with:
@@ -36,7 +36,7 @@ jobs:
           restore-keys: |
             Library-
 
-      # 3️⃣ Build Unity iOS project
+      # Build Unity iOS project
       - name: Build Unity iOS Project
         uses: game-ci/unity-builder@v4
         env:
@@ -60,16 +60,16 @@ jobs:
             -c "Set :CFBundleVersion $BUILD_NUMBER" \
             ${{ env.IOS_PROJECT_PATH }}/Info.plist
       
-      # Prefer Xcode 16.4 (iOS 18.5 SDK) if available
-      - name: Select Xcode
-        run: |
-          if [ -d "/Applications/Xcode_16.4.app" ]; then
-            sudo xcode-select -s /Applications/Xcode_16.4.app
-          else
-            sudo xcode-select -s /Applications/Xcode.app
-          fi
-          xcodebuild -version
-          xcodebuild -showsdks
+      # # Prefer Xcode 16.4 (iOS 18.5 SDK) if available
+      # - name: Select Xcode
+      #   run: |
+      #     if [ -d "/Applications/Xcode_16.4.app" ]; then
+      #       sudo xcode-select -s /Applications/Xcode_16.4.app
+      #     else
+      #       sudo xcode-select -s /Applications/Xcode.app
+      #     fi
+      #     xcodebuild -version
+      #     xcodebuild -showsdks
 
       # Install distribution certificate
       - name: Install certificate
@@ -168,18 +168,18 @@ jobs:
             project.save
           RUBY
 
-      # Show effective signing (sanity)
-      - name: Show signing (Unity-iPhone)
-        run: |
-          cd ${{ env.IOS_PROJECT_PATH }}
-          xcodebuild -project Unity-iPhone.xcodeproj -target Unity-iPhone -showBuildSettings \
-          | egrep -i 'CODE_SIGN|PROVISION|DEVELOPMENT_TEAM|PRODUCT_BUNDLE_IDENTIFIER' || true
+      # # Show effective signing (sanity)
+      # - name: Show signing (Unity-iPhone)
+      #   run: |
+      #     cd ${{ env.IOS_PROJECT_PATH }}
+      #     xcodebuild -project Unity-iPhone.xcodeproj -target Unity-iPhone -showBuildSettings \
+      #     | egrep -i 'CODE_SIGN|PROVISION|DEVELOPMENT_TEAM|PRODUCT_BUNDLE_IDENTIFIER' || true
 
-      - name: Show signing (UnityFramework)
-        run: |
-          cd ${{ env.IOS_PROJECT_PATH }}
-          xcodebuild -project Unity-iPhone.xcodeproj -target UnityFramework -showBuildSettings \
-          | egrep -i 'CODE_SIGN|PROVISION|DEVELOPMENT_TEAM|PRODUCT_BUNDLE_IDENTIFIER' || true
+      # - name: Show signing (UnityFramework)
+      #   run: |
+      #     cd ${{ env.IOS_PROJECT_PATH }}
+      #     xcodebuild -project Unity-iPhone.xcodeproj -target UnityFramework -showBuildSettings \
+      #     | egrep -i 'CODE_SIGN|PROVISION|DEVELOPMENT_TEAM|PRODUCT_BUNDLE_IDENTIFIER' || true
 
       # Archive (force codesign to our keychain; also pass CURRENT_PROJECT_VERSION to ensure Xcode uses BN)
       - name: Archive
