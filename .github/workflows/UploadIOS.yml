@@ -35,8 +35,9 @@ jobs:
         run: |
           echo "$PROFILE_BASE64" | base64 --decode > profile.mobileprovision
           mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
-          UUID=$(grep -a -E -o "UUID.*" profile.mobileprovision | head -1 | sed 's/.*<string>\(.*\)<\/string>.*/\1/')
+          UUID=$(grep -a -A1 "<key>UUID</key>" profile.mobileprovision | grep "<string>" | sed 's/.*<string>\(.*\)<\/string>.*/\1/')
           cp profile.mobileprovision ~/Library/MobileDevice/Provisioning\ Profiles/$UUID.mobileprovision
+          ls -l ~/Library/MobileDevice/Provisioning\ Profiles/
 
       - name: Check provisioning profile
         run: |
