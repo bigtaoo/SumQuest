@@ -49,6 +49,17 @@ jobs:
           /usr/libexec/PlistBuddy \
             -c "Set :CFBundleVersion $BUILD_NUMBER" \
             ${{ env.IOS_PROJECT_PATH }}/Info.plist
+      
+      # Prefer Xcode 16.4 (iOS 18.5 SDK) if available
+      - name: Select Xcode
+        run: |
+          if [ -d "/Applications/Xcode_16.4.app" ]; then
+            sudo xcode-select -s /Applications/Xcode_16.4.app
+          else
+            sudo xcode-select -s /Applications/Xcode.app
+          fi
+          xcodebuild -version
+          xcodebuild -showsdks
 
       # Install distribution certificate
       - name: Install certificate
@@ -57,9 +68,12 @@ jobs:
           CERTIFICATE_PASSWORD: ${{ secrets.IOS_CERT_PASSWORD }}
         run: |
           echo $CERTIFICATE_BASE64 | base64 --decode > cert.p12
-          security create-keychain -p "" build.keychain
-          security import cert.p12 -k build.keychain -P "$CERTIFICATE_PASSWORD" -T /usr/bin/codesign
-          security list-keychains -s build.keychain
+          security create-keychain -p github actions.keychain
+          security import dist.p12 -k "$HOME/Library/Keychains/actions.keychain" -P "${{ secrets.IOS_CERT_PASSWORD }}" -T /usr/bin/codesign
+          security list-keychains -s "$HOME/Library/Keychains/actions.keychain"
+          security default-keychain -s "$HOME/Library/Keychains/actions.keychain"
+          security unlock-keychain -p github "$HOME/Library/Keychains/actions.keychain"
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -s -k github "$HOME/Library/Keychains/actions.keychain"
 
       # Install provisioning profile
       - name: Install provisioning profile
@@ -67,16 +81,33 @@ jobs:
           PROFILE_BASE64: ${{ secrets.IOS_PROVISIONING_PROFILE }}
         run: |
           echo "$PROFILE_BASE64" | base64 --decode > profile.mobileprovision
-          mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
-          UUID=$(grep -a -A1 "<key>UUID</key>" profile.mobileprovision | grep "<string>" | sed 's/.*<string>\(.*\)<\/string>.*/\1/')
-          cp profile.mobileprovision ~/Library/MobileDevice/Provisioning\ Profiles/$UUID.mobileprovision
-          ls -l ~/Library/MobileDevice/Provisioning\ Profiles/
+
+          mkdir -p "$HOME/Library/MobileDevice/Provisioning Profiles"
+          UUID=$(/usr/libexec/PlistBuddy -c Print:UUID /dev/stdin <<< "$(security cms -D -i profile.mobileprovision)")
+          cp profile.mobileprovision "$HOME/Library/MobileDevice/Provisioning Profiles/$UUID.mobileprovision"
+          echo "Installed provisioning profile UUID: $UUID"
+          echo "Profile name:"
+          security cms -D -i profile.mobileprovision | grep -A1 "<key>Name</key>"
+      
+      # Keep keychain unlocked & show identity
+      - name: Keep keychain unlocked + verify identity
+        run: |
+          security set-keychain-settings -lut 21600 "$HOME/Library/Keychains/actions.keychain"
+          security unlock-keychain -p github "$HOME/Library/Keychains/actions.keychain"
+          echo "== Codesigning identities in actions.keychain =="
+          security find-identity -v -p codesigning "$HOME/Library/Keychains/actions.keychain" || true
 
       - name: Check provisioning profile
         run: |
           security find-identity -v -p codesigning
           security cms -D -i profile.mobileprovision | grep -A2 "Name"
           security cms -D -i profile.mobileprovision | grep -A5 Entitlements
+
+      # WWDR intermediate (defensive)
+      - name: Install Apple WWDR intermediate (optional)
+        run: |
+          curl -fsSL https://www.apple.com/certificateauthority/AppleWWDRCAG4.cer -o AppleWWDRCAG4.cer
+          sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain AppleWWDRCAG4.cer || true
 
       # Patch signing per target:
       # Unity-iPhone -> Manual + Apple Distribution + profile "tankium"
@@ -137,47 +168,77 @@ jobs:
           xcodebuild -project Unity-iPhone.xcodeproj -target UnityFramework -showBuildSettings \
           | egrep -i 'CODE_SIGN|PROVISION|DEVELOPMENT_TEAM|PRODUCT_BUNDLE_IDENTIFIER' || true
 
-      # Build IPA using Xcode
-      - name: Build IPA
-        env:
-          TEAM_ID: C677KJH544
+      # Archive (force codesign to our keychain; also pass CURRENT_PROJECT_VERSION to ensure Xcode uses BN)
+      - name: Archive
         run: |
-          cd ${{ env.IOS_PROJECT_PATH }}
-         
           xcodebuild \
-            -project Unity-iPhone.xcworkspace \
+            -workspace Unity-iPhone.xcworkspace \
             -scheme Unity-iPhone \
             -configuration Release \
-            -archivePath build.xcarchive \
             -sdk iphoneos \
-            archive
+            -archivePath "$PWD/build/SumQuest.xcarchive" \
+            archive \
             OTHER_CODE_SIGN_FLAGS="--keychain $HOME/Library/Keychains/actions.keychain --timestamp=none" \
             COMPILER_INDEX_STORE_ENABLE=NO
 
+      # Export IPA
+      - name: Export IPA
+        run: |
           xcodebuild \
             -exportArchive \
-            -archivePath build.xcarchive \
+            -archivePath "$PWD/build/SumQuest.xcarchive" \
             -exportOptionsPlist ${{ github.workspace }}/SumQuest/ExportOptions.plist \
-            -exportPath build
-
-      # Upload to TestFlight
-      - name: Upload to TestFlight
-        env:
-          APPSTORE_API_KEY_ID: ${{ secrets.APPSTORE_API_KEY_ID }}
-          APPSTORE_ISSUER_ID: ${{ secrets.APPSTORE_ISSUER_ID }}
-          APPSTORE_API_KEY: ${{ secrets.APPSTORE_API_KEY }}
+            -exportPath "$PWD/build/output" \
+            OTHER_CODE_SIGN_FLAGS="--keychain $HOME/Library/Keychains/actions.keychain --timestamp=none"
+      
+      # List output
+      - name: List export folder
         run: |
-          IPA_PATH=$(find ${{ env.BUILD_PATH }} -name "*.ipa" | head -n 1)
+          echo "== build/output contents =="
+          ls -lah build/output || true
+          echo "== build tree =="
+          find build -maxdepth 2 -type f | sed 's/^/  /'
 
-          mkdir private_keys
-          echo "$APPSTORE_API_KEY" > private_keys/AuthKey_${APPSTORE_API_KEY_ID}.p8
+      # Locate IPA
+      - name: Locate IPA
+        id: locate_ipa
+        run: |
+          set -e
+          IPA=$(ls -1 build/output/*.ipa 2>/dev/null | head -n 1 || true)
+          if [ -z "$IPA" ]; then
+            echo "::error ::No .ipa found in build/output/"
+            exit 1
+          fi
+          echo "Found IPA: $IPA"
+          echo "ipa_path=$IPA" >> "$GITHUB_OUTPUT"
 
-          xcrun altool \
-            --upload-app \
-            --type ios \
-            --file "$IPA_PATH" \
-            --apiKey $APPSTORE_API_KEY_ID \
-            --apiIssuer $APPSTORE_ISSUER_ID
+      # 7) Upload to TestFlight (API key)
+      - name: Upload to TestFlight
+        uses: apple-actions/upload-testflight-build@v1
+        with:
+          app-path: ${{ steps.locate_ipa.outputs.ipa_path }}
+          issuer-id: ${{ secrets.APPSTORE_ISSUER_ID }}
+          api-key-id: ${{ secrets.APPSTORE_API_KEY_ID }}
+          api-private-key: ${{ secrets.APPSTORE_API_KEY }}
+
+      # # Upload to TestFlight
+      # - name: Upload to TestFlight
+      #   env:
+      #     APPSTORE_API_KEY_ID: ${{ secrets.APPSTORE_API_KEY_ID }}
+      #     APPSTORE_ISSUER_ID: ${{ secrets.APPSTORE_ISSUER_ID }}
+      #     APPSTORE_API_KEY: ${{ secrets.APPSTORE_API_KEY }}
+      #   run: |
+      #     IPA_PATH=$(find ${{ env.BUILD_PATH }} -name "*.ipa" | head -n 1)
+
+      #     mkdir private_keys
+      #     echo "$APPSTORE_API_KEY" > private_keys/AuthKey_${APPSTORE_API_KEY_ID}.p8
+
+      #     xcrun altool \
+      #       --upload-app \
+      #       --type ios \
+      #       --file "$IPA_PATH" \
+      #       --apiKey $APPSTORE_API_KEY_ID \
+      #       --apiIssuer $APPSTORE_ISSUER_ID
 
       # Return Unity license
       #- name: Return Unity License
