@@ -60,9 +60,9 @@ public static class Config
         {
             Width = 5;
             Height = 6;
-            ButtonHeight = 150;
-            ButtonWidth = 150;
-            NumberImageSize = 80;
+            ButtonHeight = 160;
+            ButtonWidth = 160;
+            NumberImageSize = 85;
         }
         else if (Target > 20 && Target <= 50)
         {
