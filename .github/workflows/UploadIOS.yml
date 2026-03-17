@@ -182,10 +182,9 @@ jobs:
             -configuration Release \
             -sdk iphoneos \
             -archivePath "$PWD/build/SumQuest.xcarchive" \
+            -allowProvisioningUpdates
             CODE_SIGN_IDENTITY="Apple Distribution" \
-            CODE_SIGN_STYLE=Manual \
             DEVELOPMENT_TEAM=C677KJH544 \
-            PROVISIONING_PROFILE_SPECIFIER="sumquest"
             archive \
             OTHER_CODE_SIGN_FLAGS="--keychain $HOME/Library/Keychains/actions.keychain --timestamp=none" \
             COMPILER_INDEX_STORE_ENABLE=NO

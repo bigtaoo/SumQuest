@@ -68,8 +68,8 @@ public static class Config
         {
             Width = 6;
             Height = 7;
-            ButtonHeight = 130;
-            ButtonWidth = 130;
+            ButtonHeight = 135;
+            ButtonWidth = 135;
             NumberImageSize = 70;
         }
         else
