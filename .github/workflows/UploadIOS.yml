@@ -83,6 +83,8 @@ jobs:
       # UnityFramework -> Manual + Apple Distribution, NO provisioning profile
       - name: Patch signing per target
         run: |
+          cd ${{ env.IOS_PROJECT_PATH }}
+
           gem install xcodeproj --no-document
           ruby - <<'RUBY'
             require 'xcodeproj'
