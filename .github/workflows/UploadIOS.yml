@@ -66,9 +66,10 @@ jobs:
         env:
           PROFILE_BASE64: ${{ secrets.IOS_PROVISIONING_PROFILE }}
         run: |
+          echo "$IOS_PROVISIONING_PROFILE" | base64 --decode > profile.mobileprovision
           mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
-          echo $PROFILE_BASE64 | base64 --decode > profile.mobileprovision
-          cp profile.mobileprovision ~/Library/MobileDevice/Provisioning\ Profiles/
+          UUID=$(grep -a -E -o "UUID.*" profile.mobileprovision | head -1 | sed 's/.*<string>\(.*\)<\/string>.*/\1/')
+          cp profile.mobileprovision ~/Library/MobileDevice/Provisioning\ Profiles/$UUID.mobileprovision
 
       # 7️⃣ Build IPA using Xcode
       - name: Build IPA
