@@ -224,33 +224,35 @@ jobs:
           echo "Found IPA: $IPA"
           echo "ipa_path=$IPA" >> "$GITHUB_OUTPUT"
 
-      # 7) Upload to TestFlight (API key)
+      # # 7) Upload to TestFlight (API key)
+      # - name: Upload to TestFlight      
+      #   uses: apple-actions/upload-testflight-build@v1       
+      #   with:
+      #     app-path: ${{ steps.locate_ipa.outputs.ipa_path }}
+      #     issuer-id: ${{ secrets.APPSTORE_ISSUER_ID }}
+      #     api-key-id: ${{ secrets.APPSTORE_API_KEY_ID }}
+      #     api-private-key: ${{ secrets.APPSTORE_API_KEY }}
+
+      # Upload to TestFlight
       - name: Upload to TestFlight
-        uses: apple-actions/upload-testflight-build@v1
-        with:
-          app-path: ${{ steps.locate_ipa.outputs.ipa_path }}
-          issuer-id: ${{ secrets.APPSTORE_ISSUER_ID }}
-          api-key-id: ${{ secrets.APPSTORE_API_KEY_ID }}
-          api-private-key: ${{ secrets.APPSTORE_API_KEY }}
+        env:
+          APPSTORE_API_KEY_ID: ${{ secrets.APPSTORE_API_KEY_ID }}
+          APPSTORE_ISSUER_ID: ${{ secrets.APPSTORE_ISSUER_ID }}
+          APPSTORE_API_KEY: ${{ secrets.APPSTORE_API_KEY }}
+        run: |
+          cd ${{ env.IOS_PROJECT_PATH }}
 
-      # # Upload to TestFlight
-      # - name: Upload to TestFlight
-      #   env:
-      #     APPSTORE_API_KEY_ID: ${{ secrets.APPSTORE_API_KEY_ID }}
-      #     APPSTORE_ISSUER_ID: ${{ secrets.APPSTORE_ISSUER_ID }}
-      #     APPSTORE_API_KEY: ${{ secrets.APPSTORE_API_KEY }}
-      #   run: |
-      #     IPA_PATH=$(find ${{ env.BUILD_PATH }} -name "*.ipa" | head -n 1)
+          IPA_PATH=${{ steps.locate_ipa.outputs.ipa_path }}
 
-      #     mkdir private_keys
-      #     echo "$APPSTORE_API_KEY" > private_keys/AuthKey_${APPSTORE_API_KEY_ID}.p8
+          mkdir private_keys
+          echo "$APPSTORE_API_KEY" > private_keys/AuthKey_${APPSTORE_API_KEY_ID}.p8
 
-      #     xcrun altool \
-      #       --upload-app \
-      #       --type ios \
-      #       --file "$IPA_PATH" \
-      #       --apiKey $APPSTORE_API_KEY_ID \
-      #       --apiIssuer $APPSTORE_ISSUER_ID
+          xcrun altool \
+            --upload-app \
+            --type ios \
+            --file "$IPA_PATH" \
+            --apiKey $APPSTORE_API_KEY_ID \
+            --apiIssuer $APPSTORE_ISSUER_ID
 
       # Return Unity license
       #- name: Return Unity License
