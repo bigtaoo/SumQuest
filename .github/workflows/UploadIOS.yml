@@ -161,16 +161,20 @@ jobs:
       # Show effective signing (sanity)
       - name: Show signing (Unity-iPhone)
         run: |
+          cd ${{ env.IOS_PROJECT_PATH }}
           xcodebuild -project Unity-iPhone.xcodeproj -target Unity-iPhone -showBuildSettings \
           | egrep -i 'CODE_SIGN|PROVISION|DEVELOPMENT_TEAM|PRODUCT_BUNDLE_IDENTIFIER' || true
       - name: Show signing (UnityFramework)
         run: |
+          cd ${{ env.IOS_PROJECT_PATH }}
           xcodebuild -project Unity-iPhone.xcodeproj -target UnityFramework -showBuildSettings \
           | egrep -i 'CODE_SIGN|PROVISION|DEVELOPMENT_TEAM|PRODUCT_BUNDLE_IDENTIFIER' || true
 
       # Archive (force codesign to our keychain; also pass CURRENT_PROJECT_VERSION to ensure Xcode uses BN)
       - name: Archive
         run: |
+          cd ${{ env.IOS_PROJECT_PATH }}
+
           xcodebuild \
             -workspace Unity-iPhone.xcworkspace \
             -scheme Unity-iPhone \
@@ -184,6 +188,8 @@ jobs:
       # Export IPA
       - name: Export IPA
         run: |
+          cd ${{ env.IOS_PROJECT_PATH }}
+
           xcodebuild \
             -exportArchive \
             -archivePath "$PWD/build/SumQuest.xcarchive" \
@@ -194,6 +200,8 @@ jobs:
       # List output
       - name: List export folder
         run: |
+          cd ${{ env.IOS_PROJECT_PATH }}
+
           echo "== build/output contents =="
           ls -lah build/output || true
           echo "== build tree =="
@@ -203,6 +211,8 @@ jobs:
       - name: Locate IPA
         id: locate_ipa
         run: |
+          cd ${{ env.IOS_PROJECT_PATH }}
+
           set -e
           IPA=$(ls -1 build/output/*.ipa 2>/dev/null | head -n 1 || true)
           if [ -z "$IPA" ]; then
