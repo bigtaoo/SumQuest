@@ -209,59 +209,66 @@ jobs:
           echo "== build tree =="
           find build -maxdepth 2 -type f | sed 's/^/  /'
 
-      # Locate IPA
+      # # Locate IPA
+      # - name: Locate IPA
+      #   id: locate_ipa
+      #   run: |
+      #     cd ${{ env.IOS_PROJECT_PATH }}
+
+      #     set -e
+      #     IPA=$(ls -1 build/output/*.ipa 2>/dev/null | head -n 1 || true)
+      #     if [ -z "$IPA" ]; then
+      #       echo "::error ::No .ipa found in build/output/"
+      #       exit 1
+      #     fi
+      #     echo "Found IPA: $IPA"
+      #     echo "ipa_path=$IPA" >> "$GITHUB_OUTPUT"
+
       - name: Locate IPA
         id: locate_ipa
         run: |
-          cd ${{ env.IOS_PROJECT_PATH }}
+          IPA_PATH=$(find $GITHUB_WORKSPACE -name "*.ipa" | head -n 1)
+          echo "Found IPA: $IPA_PATH"
+          echo "ipa_path=$IPA_PATH" >> $GITHUB_OUTPUT
 
-          set -e
-          IPA=$(ls -1 build/output/*.ipa 2>/dev/null | head -n 1 || true)
-          if [ -z "$IPA" ]; then
-            echo "::error ::No .ipa found in build/output/"
-            exit 1
-          fi
-          echo "Found IPA: $IPA"
-          echo "ipa_path=$IPA" >> "$GITHUB_OUTPUT"
+      # 7) Upload to TestFlight (API key)
+      - name: Upload to TestFlight      
+        uses: apple-actions/upload-testflight-build@v1       
+        with:
+          app-path: ${{ steps.locate_ipa.outputs.ipa_path }}
+          issuer-id: ${{ secrets.APPSTORE_ISSUER_ID }}
+          api-key-id: ${{ secrets.APPSTORE_API_KEY_ID }}
+          api-private-key: ${{ secrets.APPSTORE_API_KEY }}
 
-      # # 7) Upload to TestFlight (API key)
-      # - name: Upload to TestFlight      
-      #   uses: apple-actions/upload-testflight-build@v1       
-      #   with:
-      #     app-path: ${{ steps.locate_ipa.outputs.ipa_path }}
-      #     issuer-id: ${{ secrets.APPSTORE_ISSUER_ID }}
-      #     api-key-id: ${{ secrets.APPSTORE_API_KEY_ID }}
-      #     api-private-key: ${{ secrets.APPSTORE_API_KEY }}
+      # # Upload to TestFlight
+      # - name: Upload to TestFlight
+      #   env:
+      #     APPSTORE_API_KEY_ID: ${{ secrets.APPSTORE_API_KEY_ID }}
+      #     APPSTORE_ISSUER_ID: ${{ secrets.APPSTORE_ISSUER_ID }}
+      #     APPSTORE_API_KEY: ${{ secrets.APPSTORE_API_KEY }}
+      #   run: |
+      #     cd ${{ env.IOS_PROJECT_PATH }}
 
-      # Upload to TestFlight
-      - name: Upload to TestFlight
-        env:
-          APPSTORE_API_KEY_ID: ${{ secrets.APPSTORE_API_KEY_ID }}
-          APPSTORE_ISSUER_ID: ${{ secrets.APPSTORE_ISSUER_ID }}
-          APPSTORE_API_KEY: ${{ secrets.APPSTORE_API_KEY }}
-        run: |
-          cd ${{ env.IOS_PROJECT_PATH }}
+      #     IPA_PATH=${{ steps.locate_ipa.outputs.ipa_path }}
 
-          IPA_PATH=${{ steps.locate_ipa.outputs.ipa_path }}
+      #     mkdir -p ~/.appstoreconnect/private_keys
+      #     echo "$APPSTORE_API_KEY" > ~/.appstoreconnect/private_keys/AuthKey_${APPSTORE_API_KEY_ID}.p8
 
-          mkdir -p ~/.appstoreconnect/private_keys
-          echo "$APPSTORE_API_KEY" > ~/.appstoreconnect/private_keys/AuthKey_${APPSTORE_API_KEY_ID}.p8
+      #     echo "IPA path: $IPA_PATH"
+      #     ls -l "$IPA_PATH"
 
-          echo "IPA path: $IPA_PATH"
-          ls -l "$IPA_PATH"
+      #     echo "Check API key file:"
+      #     ls -l ~/.appstoreconnect/private_keys/
 
-          echo "Check API key file:"
-          ls -l ~/.appstoreconnect/private_keys/
+      #     echo "Print first lines of key (sanity):"
+      #     head -n 2 ~/.appstoreconnect/private_keys/AuthKey_${APPSTORE_API_KEY_ID}.p8
 
-          echo "Print first lines of key (sanity):"
-          head -n 2 ~/.appstoreconnect/private_keys/AuthKey_${APPSTORE_API_KEY_ID}.p8
-
-          xcrun altool \
-            --upload-app \
-            --type ios \
-            --file "$IPA_PATH" \
-            --apiKey $APPSTORE_API_KEY_ID \
-            --apiIssuer $APPSTORE_ISSUER_ID
+      #     xcrun altool \
+      #       --upload-app \
+      #       --type ios \
+      #       --file "$IPA_PATH" \
+      #       --apiKey $APPSTORE_API_KEY_ID \
+      #       --apiIssuer $APPSTORE_ISSUER_ID
 
       # Return Unity license
       #- name: Return Unity License
