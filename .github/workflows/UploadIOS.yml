@@ -164,6 +164,7 @@ jobs:
           cd ${{ env.IOS_PROJECT_PATH }}
           xcodebuild -project Unity-iPhone.xcodeproj -target Unity-iPhone -showBuildSettings \
           | egrep -i 'CODE_SIGN|PROVISION|DEVELOPMENT_TEAM|PRODUCT_BUNDLE_IDENTIFIER' || true
+          
       - name: Show signing (UnityFramework)
         run: |
           cd ${{ env.IOS_PROJECT_PATH }}
@@ -181,6 +182,7 @@ jobs:
             -configuration Release \
             -sdk iphoneos \
             -archivePath "$PWD/build/SumQuest.xcarchive" \
+            CODE_SIGN_IDENTITY="Apple Distribution" \
             archive \
             OTHER_CODE_SIGN_FLAGS="--keychain $HOME/Library/Keychains/actions.keychain --timestamp=none" \
             COMPILER_INDEX_STORE_ENABLE=NO

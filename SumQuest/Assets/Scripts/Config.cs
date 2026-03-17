@@ -76,8 +76,8 @@ public static class Config
         {
             Width = 7;
             Height = 8;
-            ButtonHeight = 100;
-            ButtonWidth = 100;
+            ButtonHeight = 122;
+            ButtonWidth = 122;
             NumberImageSize = 60;
             ButtonPadding = 5;
         }
