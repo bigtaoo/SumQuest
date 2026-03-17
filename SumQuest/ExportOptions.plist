@@ -13,6 +13,12 @@
   <key>signingStyle</key>
   <string>manual</string>
 
+  <key>provisioningProfiles</key>
+  <dict>
+    <key>com.taowang.sumquest</key>
+    <string>sumquest</string>
+  </dict>
+
   <key>signingCertificate</key>
   <string>Apple Distribution</string>
 
