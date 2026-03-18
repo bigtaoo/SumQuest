@@ -6,6 +6,9 @@ public static class Config
     public static int Width { get; private set; }
     public static int Height { get; private set; }
     public static int Target { get; private set; }
+    public static int FirstNumber { get; private set; }
+    public static int SecondNumber { get; private set; }
+    public static float GameStartTime { get; private set; }
     public static int ButtonWidth { get; private set; }
     public static int ButtonHeight { get; private set; }
     public static int ButtonPadding { get; private set; }
@@ -44,7 +47,7 @@ public static class Config
         for (int i = 0; i < LeftNumberCount; i+=2)
         {
             int a = Random.Range(1, Config.Target - 1);
-            int b = Config.Target - a;
+            int b = Target - a;
             randomNumbers.Add(a);
             randomNumbers.Add(b);
         }
@@ -55,7 +58,10 @@ public static class Config
     private static void SetGameData()
     {
         Select = -1;
-        ButtonPadding = 10;      
+        ButtonPadding = 10;
+        FirstNumber = Random.Range(1, Target - 1);
+        SecondNumber = Target - FirstNumber;
+        GameStartTime = Time.time;
         if (Target > 0 && Target <= 20)
         {
             Width = 5;

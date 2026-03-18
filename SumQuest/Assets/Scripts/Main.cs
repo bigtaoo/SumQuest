@@ -10,6 +10,11 @@ public class GamePanel : MonoBehaviour
     [SerializeField] private List<Image> InitialImages;
     [SerializeField] private GameObject GameResult;
     [SerializeField] private Button Next;
+
+    [SerializeField] private Image FirstNumber;
+    [SerializeField] private Image SecondNumber;
+    [SerializeField] private Image TimeCount;
+    [SerializeField] private Button Settings;
     
     private Dictionary<int, int> Numbers = new();
     private Dictionary<int, Button> Buttons = new();
@@ -27,7 +32,7 @@ public class GamePanel : MonoBehaviour
         Effect.Initialize(InitialEffect);
 
         DrawNumbers();
-        Header.Initialize(InitialTarget);
+        Header.Initialize(InitialTarget, FirstNumber, SecondNumber, TimeCount, Settings);
     }
 
     // Update is called once per frame

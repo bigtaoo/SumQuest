@@ -348,6 +348,10 @@ MonoBehaviour:
   - {fileID: 1901103054}
   GameResult: {fileID: 1713312180}
   Next: {fileID: 1031726573}
+  FirstNumber: {fileID: 1627907063}
+  SecondNumber: {fileID: 681374160}
+  TimeCount: {fileID: 277292888}
+  Settings: {fileID: 505482067}
 --- !u!1 &277292886
 GameObject:
   m_ObjectHideFlags: 0
