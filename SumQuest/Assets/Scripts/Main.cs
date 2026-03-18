@@ -154,6 +154,7 @@ public class GamePanel : MonoBehaviour
             Config.LeftNumberCount -= 2;
             if (Config.LeftNumberCount <= 0)
             {
+                IsGameEnd = true;
                 GameResult.gameObject.SetActive(true);
                 NextButton.gameObject.SetActive(true);
                 RetryButton.gameObject.SetActive(false);
