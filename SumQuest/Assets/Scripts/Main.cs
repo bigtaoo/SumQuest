@@ -70,6 +70,7 @@ public class GamePanel : MonoBehaviour
         foreach (var b in Buttons.Values)
         {
             b.gameObject.SetActive(false);
+            b.onClick.RemoveAllListeners();
         }
         Config.SetGameData();
         DrawNumbers();

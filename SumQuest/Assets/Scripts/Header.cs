@@ -36,7 +36,7 @@ public static class Header
 
     public static void UpdateTimeCount()
     {
-        const int totalTime = 20;
+        const int totalTime = 90;
         int gameTime = totalTime - (int)(Time.time - Config.GameStartTime);
         if (gameTime == TimeLeft)
         {
@@ -98,14 +98,14 @@ public static class Header
             if (FirstDigit == null)
             {
                 FirstDigit = GameObject.Instantiate(First, First.transform.parent);
-                FirstDigit.transform.position = new Vector3(FirstPosition.x + 60, FirstPosition.y, FirstPosition.z);
+                FirstDigit.transform.position = new Vector3(FirstPosition.x + 50, FirstPosition.y, FirstPosition.z);
             }
             var ten = Config.FirstNumber / 10;
             var digit = Config.FirstNumber % 10;
             var image = GameNumbers.GetNumberImage(ten);
             First.sprite = image.sprite;
             image.gameObject.SetActive(false);
-            First.transform.position = new Vector3(FirstPosition.x - 60, FirstPosition.y, FirstPosition.z);
+            First.transform.position = new Vector3(FirstPosition.x - 50, FirstPosition.y, FirstPosition.z);
             image = GameNumbers.GetNumberImage(digit);
             FirstDigit.sprite = image.sprite;
             image.gameObject.SetActive(false);
@@ -128,14 +128,14 @@ public static class Header
             if (SecondDigit == null)
             {
                 SecondDigit = GameObject.Instantiate(Second, Second.transform.parent);
-                SecondDigit.transform.position = new Vector3(SecondPosition.x + 60, SecondPosition.y, SecondPosition.z);
+                SecondDigit.transform.position = new Vector3(SecondPosition.x + 50, SecondPosition.y, SecondPosition.z);
             }
             var ten = Config.SecondNumber / 10;
             var digit = Config.SecondNumber % 10;
             var image = GameNumbers.GetNumberImage(ten);
             Second.sprite = image.sprite;
             image.gameObject.SetActive(false);
-            Second.transform.position = new Vector3(SecondPosition.x - 60, SecondPosition.y, SecondPosition.z);
+            Second.transform.position = new Vector3(SecondPosition.x - 50, SecondPosition.y, SecondPosition.z);
             image = GameNumbers.GetNumberImage(digit);
             SecondDigit.sprite = image.sprite;
             image.gameObject.SetActive(false);
