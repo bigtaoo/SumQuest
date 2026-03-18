@@ -36,7 +36,7 @@ public static class Header
 
     public static void UpdateTimeCount()
     {
-        const int totalTime = 90;
+        const int totalTime = 20;
         int gameTime = totalTime - (int)(Time.time - Config.GameStartTime);
         if (gameTime == TimeLeft)
         {

@@ -55,7 +55,7 @@ public static class Config
         return randomNumbers;
     }
 
-    private static void SetGameData()
+    public static void SetGameData()
     {
         Select = -1;
         ButtonPadding = 10;

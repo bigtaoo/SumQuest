@@ -118,6 +118,14 @@ public static class GameNumbers
         Numbers[index].Clear();
     }
 
+    public static void HideAllNumbers()
+    {
+        foreach (var key in Numbers.Keys)
+        {
+            HideNumer(key);
+        }
+    }
+
     public static void DrawSelect(int index, Vector3 position)
     {
         var image = Images[ImageType.Select];
