@@ -38,7 +38,7 @@ public class GamePanel : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+        Header.UpdateTimeCount();
     }
 
     private void NextLevel()
@@ -123,7 +123,7 @@ public class GamePanel : MonoBehaviour
             Config.Select = -1;
             GameNumbers.HideSelect();           
             Config.LeftNumberCount -= 2;
-            if (Config.LeftNumberCount <= 0)
+            if (Config.LeftNumberCount <= 0 || Header.TimeLeft <= 0)
             {
                 GameResult.gameObject.SetActive(true);
             }

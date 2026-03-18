@@ -11,9 +11,10 @@ public static class Header
     private static Image Second;
     private static Image SecondDigit;
     private static Vector3 SecondPosition;
-    private static Image Time;
+    private static Image TimeCount;
+    private static Image TimeCountDigit;
     private static Button Settings;
-    private static int TimeLeft;
+    public static int TimeLeft { get; private set; }
 
     public static void Initialize(Image target, Image first, Image second, Image time, Button settings)
     {
@@ -22,7 +23,7 @@ public static class Header
         FirstPosition = First.transform.position;
         Second = second;
         SecondPosition = Second.transform.position;
-        Time = time;
+        TimeCount = time;
         Settings = settings;
         UpdateHeader();
     }
@@ -31,6 +32,52 @@ public static class Header
     {
         UpdateTarget();
         UpdateFirstAndSecondNumber();
+    }
+
+    public static void UpdateTimeCount()
+    {
+        const int totalTime = 90;
+        int gameTime = totalTime - (int)(Time.time - Config.GameStartTime);
+        if (gameTime == TimeLeft)
+        {
+            return;
+        }
+        TimeLeft = gameTime;
+
+        if (TimeLeft < 0)
+        {
+            return;
+        }
+
+        if (TimeCountDigit == null)
+        {
+            TimeCountDigit = GameObject.Instantiate(TimeCount, TimeCount.transform.parent);
+            var position = TimeCount.transform.position;
+            TimeCountDigit.transform.position = new Vector3(position.x + 120, position.y, position.z);
+            TimeCountDigit.gameObject.SetActive(false);
+        }
+        if (TimeLeft < 10)
+        {
+            if (TimeCountDigit != null)
+            {
+                TimeCountDigit.gameObject.SetActive(false);
+            }
+            var image = GameNumbers.GetNumberImage(TimeLeft);
+            TimeCount.sprite = image.sprite;
+            image.gameObject.SetActive(false);
+        }
+        else if (TimeLeft < 100)
+        {
+            TimeCountDigit.gameObject.SetActive(true);
+            var ten = TimeLeft / 10;
+            var digit = TimeLeft % 10;
+            var image = GameNumbers.GetNumberImage(ten);
+            TimeCount.sprite = image.sprite;
+            image.gameObject.SetActive(false);
+            image = GameNumbers.GetNumberImage(digit);
+            TimeCountDigit.sprite = image.sprite;
+            image.gameObject.SetActive(false);
+        }
     }
 
     private static void UpdateFirstAndSecondNumber()
