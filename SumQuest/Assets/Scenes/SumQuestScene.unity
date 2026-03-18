@@ -285,7 +285,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &165491569
 RectTransform:
   m_ObjectHideFlags: 0
@@ -398,10 +398,14 @@ MonoBehaviour:
   GameResult: {fileID: 1713312180}
   NextButton: {fileID: 1031726573}
   RetryButton: {fileID: 1873025669}
+  SettingsUI: {fileID: 165491568}
   FirstNumber: {fileID: 1627907063}
   SecondNumber: {fileID: 681374160}
   TimeCount: {fileID: 277292888}
-  Settings: {fileID: 505482067}
+  SettingsButton: {fileID: 505482067}
+  MusicButton: {fileID: 1170479847}
+  SoundButton: {fileID: 916868215}
+  DisableImage: {fileID: 1823109890}
 --- !u!1 &228328274
 GameObject:
   m_ObjectHideFlags: 0

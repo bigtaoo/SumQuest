@@ -51,13 +51,14 @@ public class SoundManager : MonoBehaviour
         }
     }
 
-    public void StopMusic()
-    {
-        musicSource.Stop();
-    }
+    // public void StopMusic()
+    // {
+    //     musicSource.Stop();
+    // }
 
     public void SetMusicVolume(float volume)
     {
+        // Debug.LogWarning($"Music volume: {volume}");
         musicSource.volume = volume;
     }
 
@@ -69,6 +70,7 @@ public class SoundManager : MonoBehaviour
 
     public void SetSFXVolume(float volume)
     {
+        // Debug.LogWarning($"SFX volume: {volume}");
         sfxSource.volume = volume;
     }
 

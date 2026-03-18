@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -11,11 +12,16 @@ public class GamePanel : MonoBehaviour
     [SerializeField] private GameObject GameResult;
     [SerializeField] private Button NextButton;
     [SerializeField] private Button RetryButton;
+    [SerializeField] private GameObject SettingsUI;
 
     [SerializeField] private Image FirstNumber;
     [SerializeField] private Image SecondNumber;
     [SerializeField] private Image TimeCount;
-    [SerializeField] private Button Settings;
+    [SerializeField] private Button SettingsButton;
+
+    [SerializeField] private Button MusicButton;
+    [SerializeField] private Button SoundButton;
+    [SerializeField] private Image DisableImage;
     
     private Dictionary<int, int> Numbers = new();
     private Dictionary<int, Button> Buttons = new();
@@ -26,15 +32,26 @@ public class GamePanel : MonoBehaviour
     {
         Config.Initialize();
         InitialNumber.gameObject.SetActive(false);      
-        GameResult.gameObject.SetActive(false);
+        GameResult.SetActive(false);
         NextButton.onClick.AddListener(() => NextLevel());
         RetryButton.onClick.AddListener(() => Retry());
+        SettingsUI.gameObject.SetActive(false);
+        SettingsButton.onClick.AddListener(() => SettingsUI.SetActive(!SettingsUI.activeSelf));
           
         GameNumbers.Initialize(InitialImages);
         Effect.Initialize(InitialEffect);
+        Settings.Initialize(MusicButton, SoundButton, DisableImage);
 
         DrawNumbers();
-        Header.Initialize(InitialTarget, FirstNumber, SecondNumber, TimeCount, Settings);
+        Header.Initialize(InitialTarget, FirstNumber, SecondNumber, TimeCount, SettingsButton);
+
+        StartCoroutine(RecheckSoundSettings());
+    }
+
+    IEnumerator RecheckSoundSettings()
+    {
+        yield return new WaitForSeconds(0.5f);
+        Settings.SetDisableImage();
     }
 
     // Update is called once per frame
