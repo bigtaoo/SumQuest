@@ -26,7 +26,8 @@ public static class Header
             {
                 Digit = GameObject.Instantiate(Target, Target.transform.parent);
                 var position = Target.transform.position;
-                Digit.transform.position = new Vector3(position.x + 120, position.y, position.z);
+                Digit.transform.position = new Vector3(position.x + 60, position.y, position.z);
+                Target.transform.position = new Vector3(position.x - 60, position.y, position.z);
             }
             var ten = Config.Target / 10;
             var digit = Config.Target % 10;
