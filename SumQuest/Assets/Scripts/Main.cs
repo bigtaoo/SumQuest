@@ -22,6 +22,8 @@ public class GamePanel : MonoBehaviour
     [SerializeField] private Button MusicButton;
     [SerializeField] private Button SoundButton;
     [SerializeField] private Image DisableImage;
+    [SerializeField] private Image SettingsSelectImage;
+    [SerializeField] private List<Button> SettingsButtons;
     
     private Dictionary<int, int> Numbers = new();
     private Dictionary<int, Button> Buttons = new();
@@ -40,7 +42,8 @@ public class GamePanel : MonoBehaviour
           
         GameNumbers.Initialize(InitialImages);
         Effect.Initialize(InitialEffect);
-        Settings.Initialize(MusicButton, SoundButton, DisableImage);
+        Settings.Initialize(MusicButton, SoundButton, DisableImage, SettingsSelectImage, 
+            SettingsButtons, Buttons);
 
         DrawNumbers();
         Header.Initialize(InitialTarget, FirstNumber, SecondNumber, TimeCount, SettingsButton);
@@ -105,6 +108,7 @@ public class GamePanel : MonoBehaviour
             for (int j = 0; j < Config.Height; ++j)
             {
                 var button = GetButtonObject();
+                button.GetComponent<Image>().sprite = Settings.ButtonSprite;
                 button.GetComponent<RectTransform>().sizeDelta = new Vector2(Config.ButtonWidth, Config.ButtonHeight);
                 button.transform.position = 
                     new Vector3(startPosition.x + (Config.ButtonWidth + Config.ButtonPadding) * i, 

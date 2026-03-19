@@ -52,6 +52,7 @@
     <Compile Include="Assets/Scripts/Settings.cs" />
     <Compile Include="Assets/Scripts/Effect.cs" />
     <Compile Include="Assets/Scripts/FrameAnimation.cs" />
+    <Compile Include="Assets/Scripts/ButtonImageTypes.cs" />
     <Compile Include="Assets/Scripts/Header.cs" />
     <Compile Include="Assets/Scripts/SoundManager.cs" />
     <Compile Include="Assets/Scripts/Helper.cs" />
