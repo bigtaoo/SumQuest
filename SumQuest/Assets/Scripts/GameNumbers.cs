@@ -86,7 +86,8 @@ public static class GameNumbers
         if (number < 10)
         {
             var numImage = GetNumberImage(number);
-            numImage.GetComponent<RectTransform>().sizeDelta = new Vector2(Config.NumberImageSize, Config.NumberImageSize);
+            numImage.GetComponent<RectTransform>().sizeDelta = new Vector2(
+                Config.NumberImageSize, Config.NumberImageSize);
             numImage.transform.position = position;
             numImage.transform.localScale = new Vector3(1.0f, 1.0f, 1);
             Numbers[index].Add(numImage);
@@ -97,13 +98,17 @@ public static class GameNumbers
             var digit = number % 10;
 
             var numImage = GetNumberImage(ten);
-            numImage.GetComponent<RectTransform>().sizeDelta = new Vector2(Config.NumberImageSize, Config.NumberImageSize);
-            numImage.transform.position = new Vector3(position.x - Config.NumberImageSize / 3, position.y, position.z);
+            numImage.GetComponent<RectTransform>().sizeDelta = new Vector2(
+                Config.NumberImageSize, Config.NumberImageSize);
+            numImage.transform.position = new Vector3(
+                position.x - Config.NumberImageSize / 3 * Config.CanvasScale, position.y, position.z);
             numImage.transform.localScale = new Vector3(0.7f, 0.7f, 1);
             Numbers[index].Add(numImage);
             numImage = GetNumberImage(digit);
-            numImage.GetComponent<RectTransform>().sizeDelta = new Vector2(Config.NumberImageSize, Config.NumberImageSize);
-            numImage.transform.position = new Vector3(position.x + Config.NumberImageSize / 3, position.y, position.z);
+            numImage.GetComponent<RectTransform>().sizeDelta = new Vector2(
+                Config.NumberImageSize, Config.NumberImageSize);
+            numImage.transform.position = new Vector3(
+                position.x + Config.NumberImageSize / 3 * Config.CanvasScale, position.y, position.z);
             numImage.transform.localScale = new Vector3(0.7f, 0.7f, 1);
             Numbers[index].Add(numImage);
         }

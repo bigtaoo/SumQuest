@@ -15,6 +15,7 @@ public static class Config
     public static int NumberImageSize { get; private set; }
     public static int LeftNumberCount { get; set; }
     public static int Select { get; set; }
+    public static float CanvasScale { get; private set; }
 
     private static readonly string TargetNumberKey = "TargetNumber";
 
@@ -38,6 +39,11 @@ public static class Config
     public static int Index(int i, int j)
     {
         return j * 100 + i;
+    }
+
+    public static void SetCanvasScale(float scale)
+    {
+        CanvasScale = scale;
     }
 
     public static List<int> InitializeNumbers()

@@ -28,10 +28,13 @@ public class GamePanel : MonoBehaviour
     private Dictionary<int, int> Numbers = new();
     private Dictionary<int, Button> Buttons = new();
     private bool IsGameEnd = false;
+    private int LastScreenWidth;
+    private int LastScreenHeight;
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
+        Resize();
         Config.Initialize();
         InitialNumber.gameObject.SetActive(false);      
         GameResult.SetActive(false);
@@ -60,6 +63,11 @@ public class GamePanel : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (Screen.width != LastScreenWidth || Screen.height != LastScreenHeight)
+        {
+            Resize();
+        }
+
         if (IsGameEnd)
         {
             return;
@@ -72,6 +80,16 @@ public class GamePanel : MonoBehaviour
             RetryButton.gameObject.SetActive(true);
             NextButton.gameObject.SetActive(false);
         }
+    }
+
+    private void Resize()
+    {
+        LastScreenWidth = Screen.width;
+        LastScreenHeight = Screen.height;
+
+        var canvas = GetComponentInParent<Canvas>();
+        Debug.Log($"Canvas scale: {canvas.scaleFactor}");
+        Config.SetCanvasScale(canvas.scaleFactor);
     }
 
     private void NextLevel()
@@ -109,10 +127,11 @@ public class GamePanel : MonoBehaviour
             {
                 var button = GetButtonObject();
                 button.GetComponent<Image>().sprite = Settings.ButtonSprite;
-                button.GetComponent<RectTransform>().sizeDelta = new Vector2(Config.ButtonWidth, Config.ButtonHeight);
+                button.GetComponent<RectTransform>().sizeDelta = new Vector2(
+                    Config.ButtonWidth * Config.CanvasScale, Config.ButtonHeight * Config.CanvasScale);
                 button.transform.position = 
-                    new Vector3(startPosition.x + (Config.ButtonWidth + Config.ButtonPadding) * i, 
-                    startPosition.y - (Config.ButtonHeight + Config.ButtonPadding) * j, startPosition.z);
+                    new Vector3(startPosition.x + (Config.ButtonWidth + Config.ButtonPadding) * Config.CanvasScale * i, 
+                    startPosition.y - (Config.ButtonHeight + Config.ButtonPadding) * Config.CanvasScale * j, startPosition.z);
                 button.transform.SetParent(InitialNumber.transform.parent);
                 button.name = Config.Index(i, j).ToString();
                 button.gameObject.SetActive(true);

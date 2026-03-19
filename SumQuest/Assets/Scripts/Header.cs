@@ -53,7 +53,8 @@ public static class Header
         {
             TimeCountDigit = GameObject.Instantiate(TimeCount, TimeCount.transform.parent);
             var position = TimeCount.transform.position;
-            TimeCountDigit.transform.position = new Vector3(position.x + 120, position.y, position.z);
+            TimeCountDigit.transform.position = new Vector3(
+                position.x + 120 * Config.CanvasScale, position.y, position.z);
             TimeCountDigit.gameObject.SetActive(false);
         }
         if (TimeLeft < 10)
@@ -98,14 +99,16 @@ public static class Header
             if (FirstDigit == null)
             {
                 FirstDigit = GameObject.Instantiate(First, First.transform.parent);
-                FirstDigit.transform.position = new Vector3(FirstPosition.x + 50, FirstPosition.y, FirstPosition.z);
+                FirstDigit.transform.position = new Vector3(
+                    FirstPosition.x + 50 * Config.CanvasScale, FirstPosition.y, FirstPosition.z);
             }
             var ten = Config.FirstNumber / 10;
             var digit = Config.FirstNumber % 10;
             var image = GameNumbers.GetNumberImage(ten);
             First.sprite = image.sprite;
             image.gameObject.SetActive(false);
-            First.transform.position = new Vector3(FirstPosition.x - 50, FirstPosition.y, FirstPosition.z);
+            First.transform.position = new Vector3(
+                FirstPosition.x - 50 * Config.CanvasScale, FirstPosition.y, FirstPosition.z);
             image = GameNumbers.GetNumberImage(digit);
             FirstDigit.sprite = image.sprite;
             image.gameObject.SetActive(false);
@@ -128,14 +131,16 @@ public static class Header
             if (SecondDigit == null)
             {
                 SecondDigit = GameObject.Instantiate(Second, Second.transform.parent);
-                SecondDigit.transform.position = new Vector3(SecondPosition.x + 50, SecondPosition.y, SecondPosition.z);
+                SecondDigit.transform.position = new Vector3(
+                    SecondPosition.x + 50 * Config.CanvasScale, SecondPosition.y, SecondPosition.z);
             }
             var ten = Config.SecondNumber / 10;
             var digit = Config.SecondNumber % 10;
             var image = GameNumbers.GetNumberImage(ten);
             Second.sprite = image.sprite;
             image.gameObject.SetActive(false);
-            Second.transform.position = new Vector3(SecondPosition.x - 50, SecondPosition.y, SecondPosition.z);
+            Second.transform.position = new Vector3(
+                SecondPosition.x - 50 * Config.CanvasScale, SecondPosition.y, SecondPosition.z);
             image = GameNumbers.GetNumberImage(digit);
             SecondDigit.sprite = image.sprite;
             image.gameObject.SetActive(false);
@@ -157,8 +162,10 @@ public static class Header
             {
                 Digit = GameObject.Instantiate(Target, Target.transform.parent);
                 var position = Target.transform.position;
-                Digit.transform.position = new Vector3(position.x + 60, position.y, position.z);
-                Target.transform.position = new Vector3(position.x - 60, position.y, position.z);
+                Digit.transform.position = new Vector3(
+                    position.x + 60 * Config.CanvasScale, position.y, position.z);
+                Target.transform.position = new Vector3(
+                    position.x - 60 * Config.CanvasScale, position.y, position.z);
             }
             var ten = Config.Target / 10;
             var digit = Config.Target % 10;
