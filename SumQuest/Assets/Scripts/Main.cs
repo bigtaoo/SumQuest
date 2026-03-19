@@ -81,9 +81,10 @@ public class GamePanel : MonoBehaviour
             NextButton.gameObject.SetActive(false);
         }
     }
-
+    
     private void Resize()
     {
+        Canvas.ForceUpdateCanvases();
         LastScreenWidth = Screen.width;
         LastScreenHeight = Screen.height;
 
@@ -118,6 +119,7 @@ public class GamePanel : MonoBehaviour
 
     private void DrawNumbers()
     {
+        Debug.Log($"Draw number, canvas scale: {Config.CanvasScale}");
         var startPosition = InitialNumber.transform.position;
         var randomNumbers = Config.InitializeNumbers();
         var numberIndex = 0;
