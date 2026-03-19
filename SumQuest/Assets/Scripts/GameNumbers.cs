@@ -31,7 +31,6 @@ public static class GameNumbers
                 case "7": Images[ImageType.Number7] = image; AllImages[ImageType.Number7].Add(image); break;
                 case "8": Images[ImageType.Number8] = image; AllImages[ImageType.Number8].Add(image); break;
                 case "9": Images[ImageType.Number9] = image; AllImages[ImageType.Number9].Add(image); break;
-                case "Hide": Images[ImageType.Hide] = image; AllImages[ImageType.Hide].Add(image); break;
                 case "Select": Images[ImageType.Select] = image; AllImages[ImageType.Select].Add(image); break;
                 default: break;
             }
@@ -56,7 +55,7 @@ public static class GameNumbers
             7 => ImageType.Number7,
             8 => ImageType.Number8,
             9 => ImageType.Number9,
-            _ => ImageType.Hide,
+            _ => ImageType.Select,
         };
         var images = AllImages[imageType];
         foreach (var m in images)

@@ -11,6 +11,5 @@ public enum ImageType
     Number7,
     Number8,
     Number9,
-    Hide,
     Select,
 }
