@@ -1,3 +1,5 @@
 ﻿<Solution>
+  <Project Path="Unity.BuildReportInspector.Editor.Mobile.csproj" />
+  <Project Path="Unity.BuildReportInspector.Editor.csproj" />
   <Project Path="Assembly-CSharp.csproj" />
 </Solution>
