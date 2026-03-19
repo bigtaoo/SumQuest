@@ -60,16 +60,16 @@ jobs:
             -c "Set :CFBundleVersion $BUILD_NUMBER" \
             ${{ env.IOS_PROJECT_PATH }}/Info.plist
       
-      # # Prefer Xcode 16.4 (iOS 18.5 SDK) if available
-      # - name: Select Xcode
-      #   run: |
-      #     if [ -d "/Applications/Xcode_16.4.app" ]; then
-      #       sudo xcode-select -s /Applications/Xcode_16.4.app
-      #     else
-      #       sudo xcode-select -s /Applications/Xcode.app
-      #     fi
-      #     xcodebuild -version
-      #     xcodebuild -showsdks
+      # Prefer Xcode 26 if available (Minimal requirement from Apple Store)
+      - name: Select Xcode
+        run: |
+          if [ -d "/Applications/Xcode_26.app" ]; then
+            sudo xcode-select -s /Applications/Xcode_26.app
+          else
+            sudo xcode-select -s /Applications/Xcode.app
+          fi
+          xcodebuild -version
+          xcodebuild -showsdks
 
       # Install distribution certificate
       - name: Install certificate
@@ -249,6 +249,7 @@ jobs:
           issuer-id: ${{ secrets.APPSTORE_ISSUER_ID }}
           api-key-id: ${{ secrets.APPSTORE_API_KEY_ID }}
           api-private-key: ${{ secrets.APPSTORE_API_KEY }}
+          uses-non-exempt-encryption: false
 
       # # Upload to TestFlight
       # - name: Upload to TestFlight
