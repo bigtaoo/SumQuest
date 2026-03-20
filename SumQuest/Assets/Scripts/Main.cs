@@ -119,7 +119,7 @@ public class GamePanel : MonoBehaviour
 
     private void DrawNumbers()
     {
-        Debug.Log($"Draw number, canvas scale: {Config.CanvasScale}");
+        // Debug.Log($"Draw number, canvas scale: {Config.CanvasScale}");
         var startPosition = InitialNumber.transform.position;
         var randomNumbers = Config.InitializeNumbers();
         var numberIndex = 0;
