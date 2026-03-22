@@ -71,6 +71,7 @@
     <Compile Include="Assets/Scripts/GameNumbers.cs" />
     <Compile Include="Assets/CrazySDK/Scripts/Utils/Utils.cs" />
     <Compile Include="Assets/Scripts/Header.cs" />
+    <Compile Include="Assets/Scripts/SDK/CrazyGamesSDK.cs" />
     <Compile Include="Assets/CrazySDK/Demo/DemoAssets/Scripts/DataModuleDemo.cs" />
     <Compile Include="Assets/CrazySDK/Scripts/Utils/CrazyTaskUtil.cs" />
     <Compile Include="Assets/Scripts/SoundManager.cs" />
@@ -78,7 +79,9 @@
     <Compile Include="Assets/CrazySDK/Scripts/Utils/CrazyAdPreview.cs" />
     <Compile Include="Assets/CrazySDK/Scripts/SiteLock/Encryption.cs" />
     <Compile Include="Assets/Scripts/Config.cs" />
+    <Compile Include="Assets/Scripts/SDK/SDKInterface.cs" />
     <Compile Include="Assets/Scripts/ImageType.cs" />
+    <Compile Include="Assets/Scripts/SDK/SDK.cs" />
     <Compile Include="Assets/CrazySDK/Scripts/Modules/AdModule.cs" />
     <Compile Include="Assets/CrazySDK/Scripts/CrazySettings.cs" />
     <Compile Include="Assets/CrazySDK/Demo/DemoAssets/Scripts/ScoreEncryption.cs" />

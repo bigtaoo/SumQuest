@@ -52,6 +52,7 @@ public class GamePanel : MonoBehaviour
         Header.Initialize(InitialTarget, FirstNumber, SecondNumber, TimeCount, SettingsButton);
 
         StartCoroutine(RecheckSoundSettings());
+        SDK.Initialize();
     }
 
     IEnumerator RecheckSoundSettings()
