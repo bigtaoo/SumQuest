@@ -618,6 +618,22 @@
       <HintPath>Library/PackageCache/com.unity.nuget.newtonsoft-json@4dfd81071c64/Runtime/Newtonsoft.Json.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="wx-perf">
+      <HintPath>Assets/WX-WASM-SDK-V2/Runtime/Plugins/wx-perf.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Unity.FontABTool">
+      <HintPath>Assets/WX-WASM-SDK-V2/Runtime/Plugins/Unity.FontABTool.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="LitJson">
+      <HintPath>Assets/WX-WASM-SDK-V2/Runtime/Plugins/LitJson.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="wx-runtime-editor">
+      <HintPath>Assets/WX-WASM-SDK-V2/Runtime/Plugins/wx-runtime-editor.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="UnityEditor.iOS.Extensions.Xcode">
       <HintPath>/Applications/Unity/Hub/Editor/6000.3.9f1/PlaybackEngines/iOSSupport/UnityEditor.iOS.Extensions.Xcode.dll</HintPath>
       <Private>False</Private>
@@ -1180,6 +1196,8 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="Wx.csproj" />
+    <ProjectReference Include="WxEditor.csproj" />
     <ProjectReference Include="Unity.BuildReportInspector.Editor.csproj" />
     <ProjectReference Include="CrazyGamesDefineManager.csproj" />
   </ItemGroup>

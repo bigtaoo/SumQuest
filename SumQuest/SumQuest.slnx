@@ -1,6 +1,8 @@
 ﻿<Solution>
   <Project Path="Unity.BuildReportInspector.Editor.Mobile.csproj" />
+  <Project Path="WxEditor.csproj" />
   <Project Path="Assembly-CSharp.csproj" />
+  <Project Path="Wx.csproj" />
   <Project Path="Assembly-CSharp-Editor.csproj" />
   <Project Path="Unity.BuildReportInspector.Editor.csproj" />
   <Project Path="CrazyGamesDefineManager.csproj" />
