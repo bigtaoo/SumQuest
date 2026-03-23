@@ -1,0 +1,67 @@
+name: Build Android (AAB + APK)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-android:
+    runs-on: ubuntu-latest
+
+    env:
+      UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+      UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
+      UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
+      BUILD_NUMBER: ${{ github.run_number }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Cache Library
+        uses: actions/cache@v4
+        with:
+          path: Library
+          key: Library-${{ hashFiles('Assets/**', 'ProjectSettings/**') }}
+          restore-keys: |
+            Library-
+
+      - name: Decode Keystore
+        run: |
+          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > user.keystore
+
+      # ---------- BUILD AAB ----------
+      - name: Build AAB (Google Play)
+        uses: game-ci/unity-builder@v4
+        with:
+          unityVersion: 6000.3.9f1
+          targetPlatform: Android
+          buildMethod: BuildScript.BuildAAB
+        env:
+          BUILD_NUMBER: ${{ github.run_number }}
+          ANDROID_KEYSTORE_NAME: user.keystore
+          ANDROID_KEYSTORE_PASS: ${{ secrets.KEYSTORE_PASS }}
+          ANDROID_KEYALIAS_NAME: ${{ secrets.KEY_ALIAS }}
+          ANDROID_KEYALIAS_PASS: ${{ secrets.KEY_ALIAS_PASS }}
+
+      # ---------- BUILD APK ----------
+      - name: Build APK (TapTap)
+        uses: game-ci/unity-builder@v4
+        with:
+          unityVersion: 6000.3.9f1
+          targetPlatform: Android
+          buildMethod: BuildScript.BuildAPK
+        env:
+          BUILD_NUMBER: ${{ github.run_number }}
+          ANDROID_KEYSTORE_NAME: user.keystore
+          ANDROID_KEYSTORE_PASS: ${{ secrets.KEYSTORE_PASS }}
+          ANDROID_KEYALIAS_NAME: ${{ secrets.KEY_ALIAS }}
+          ANDROID_KEYALIAS_PASS: ${{ secrets.KEY_ALIAS_PASS }}
+
+      # ---------- UPLOAD ARTIFACT ----------
+      - name: Upload Builds
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-builds
+          path: |
+            build/Android/*.aab
+            build/Android/*.apk
