@@ -36,6 +36,7 @@ jobs:
           unityVersion: 6000.3.9f1
           targetPlatform: Android
           buildMethod: BuildScript.BuildAAB
+          versioning: None
         env:
           BUILD_NUMBER: ${{ github.run_number }}
           ANDROID_KEYSTORE_NAME: user.keystore
@@ -50,6 +51,7 @@ jobs:
           unityVersion: 6000.3.9f1
           targetPlatform: Android
           buildMethod: BuildScript.BuildAPK
+          versioning: None
         env:
           BUILD_NUMBER: ${{ github.run_number }}
           ANDROID_KEYSTORE_NAME: user.keystore
