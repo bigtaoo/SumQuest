@@ -15,9 +15,9 @@ MonoBehaviour:
   ProjectConf:
     projectName: "\u6570\u5B57\u52A0\u52A0\u6D88"
     Appid: wx25a3b18a3e83ffce
-    CDN: 
+    CDN: localhost
     assetLoadType: 0
-    compressDataPackage: 1
+    compressDataPackage: 0
     VideoUrl: 
     relativeDST: /Users/wangtao/Desktop/SumQuest/SumQuest/Builds/WeChatMini
     DST: /Users/wangtao/Desktop/SumQuest/SumQuest/Builds/WeChatMini
@@ -57,7 +57,7 @@ MonoBehaviour:
     fbslim: 0
     DeleteStreamingAssets: 1
     ProfilingMemory: 0
-    CleanBuild: 0
+    CleanBuild: 1
     CustomNodePath: 
     autoAdaptScreen: 0
     showMonitorSuggestModal: 1
@@ -68,7 +68,7 @@ MonoBehaviour:
     enableIOSPerformancePlus: 0
     enableiOSMetal: 0
     enableEmscriptenGLX: 0
-    brotliMT: 1
+    brotliMT: 0
     enableWasm2023: 0
   CompressTexture:
     halfSize: 0
@@ -81,22 +81,22 @@ MonoBehaviour:
     force: 0
   PlayerPrefsKeys: []
   FontOptions:
-    CJK_Unified_Ideographs: 1
-    C0_Controls_and_Basic_Latin: 1
-    CJK_Symbols_and_Punctuation: 1
-    General_Punctuation: 1
-    Enclosed_CJK_Letters_and_Months: 1
-    Vertical_Forms: 1
-    CJK_Compatibility_Forms: 1
-    Miscellaneous_Symbols: 1
-    CJK_Compatibility: 1
-    Halfwidth_and_Fullwidth_Forms: 1
-    Dingbats: 1
-    Letterlike_Symbols: 1
-    Enclosed_Alphanumerics: 1
-    Number_Forms: 1
-    Currency_Symbols: 1
-    Arrows: 1
-    Geometric_Shapes: 1
-    Mathematical_Operators: 1
+    CJK_Unified_Ideographs: 0
+    C0_Controls_and_Basic_Latin: 0
+    CJK_Symbols_and_Punctuation: 0
+    General_Punctuation: 0
+    Enclosed_CJK_Letters_and_Months: 0
+    Vertical_Forms: 0
+    CJK_Compatibility_Forms: 0
+    Miscellaneous_Symbols: 0
+    CJK_Compatibility: 0
+    Halfwidth_and_Fullwidth_Forms: 0
+    Dingbats: 0
+    Letterlike_Symbols: 0
+    Enclosed_Alphanumerics: 0
+    Number_Forms: 0
+    Currency_Symbols: 0
+    Arrows: 0
+    Geometric_Shapes: 0
+    Mathematical_Operators: 0
     CustomUnicode: 

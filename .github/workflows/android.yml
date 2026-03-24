@@ -8,6 +8,7 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
+      PROJECT_PATH: SumQuest
       UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
       UNITY_EMAIL: ${{ secrets.UNITY_EMAIL }}
       UNITY_PASSWORD: ${{ secrets.UNITY_PASSWORD }}
@@ -20,7 +21,7 @@ jobs:
       - name: Cache Library
         uses: actions/cache@v4
         with:
-          path: Library
+          path: ${{ env.PROJECT_PATH }}/Library
           key: Library-${{ hashFiles('Assets/**', 'ProjectSettings/**') }}
           restore-keys: |
             Library-
@@ -37,6 +38,7 @@ jobs:
           targetPlatform: Android
           buildMethod: BuildScript.BuildAAB
           versioning: None
+          projectPath: ${{ env.PROJECT_PATH }}
         env:
           BUILD_NUMBER: ${{ github.run_number }}
           ANDROID_KEYSTORE_NAME: user.keystore
@@ -52,6 +54,7 @@ jobs:
           targetPlatform: Android
           buildMethod: BuildScript.BuildAPK
           versioning: None
+          projectPath: ${{ env.PROJECT_PATH }}
         env:
           BUILD_NUMBER: ${{ github.run_number }}
           ANDROID_KEYSTORE_NAME: user.keystore
