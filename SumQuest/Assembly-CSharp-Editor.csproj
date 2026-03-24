@@ -640,8 +640,20 @@
       <HintPath>/Applications/Unity/Hub/Editor/6000.3.9f1/Unity.app/Contents/PlaybackEngines/MacStandaloneSupport/UnityEditor.OSXStandalone.Extensions.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="UnityEditor.Android.Extensions">
+      <HintPath>/Applications/Unity/Hub/Editor/6000.3.9f1/PlaybackEngines/AndroidPlayer/UnityEditor.Android.Extensions.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="UnityEditor.iOS.Extensions">
       <HintPath>/Applications/Unity/Hub/Editor/6000.3.9f1/PlaybackEngines/iOSSupport/UnityEditor.iOS.Extensions.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="wx-runtime-editor">
+      <HintPath>Assets/WX-WASM-SDK-V2/Runtime/Plugins/wx-runtime-editor.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="wx-perf">
+      <HintPath>Assets/WX-WASM-SDK-V2/Runtime/Plugins/wx-perf.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="Google.VersionHandler">
@@ -656,12 +668,24 @@
       <HintPath>Library/PackageCache/com.unity.ext.nunit@d8c07649098d/net40/unity-custom/nunit.framework.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="Unity.FontABTool">
+      <HintPath>Assets/WX-WASM-SDK-V2/Runtime/Plugins/Unity.FontABTool.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="Google.VersionHandlerImpl">
       <HintPath>Assets/MobileDependencyResolver/Editor/1.2.185/Google.VersionHandlerImpl.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="LitJson">
+      <HintPath>Assets/WX-WASM-SDK-V2/Runtime/Plugins/LitJson.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="Google.JarResolver">
       <HintPath>Assets/MobileDependencyResolver/Editor/1.2.185/Google.JarResolver.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="wx-editor">
+      <HintPath>Assets/WX-WASM-SDK-V2/Editor/wx-editor.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="Newtonsoft.Json">
@@ -682,6 +706,14 @@
     </Reference>
     <Reference Include="UnityEditor.Apple.Extensions.Common">
       <HintPath>/Applications/Unity/Hub/Editor/6000.3.9f1/PlaybackEngines/iOSSupport/UnityEditor.Apple.Extensions.Common.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Unity.Android.Types">
+      <HintPath>/Applications/Unity/Hub/Editor/6000.3.9f1/PlaybackEngines/AndroidPlayer/Unity.Android.Types.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Unity.Android.Gradle">
+      <HintPath>/Applications/Unity/Hub/Editor/6000.3.9f1/PlaybackEngines/AndroidPlayer/Unity.Android.Gradle.dll</HintPath>
       <Private>False</Private>
     </Reference>
     <Reference Include="UnityEditor.iOS.Extensions.Xcode">
@@ -1255,6 +1287,8 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="Assembly-CSharp.csproj" />
+    <ProjectReference Include="Wx.csproj" />
+    <ProjectReference Include="WxEditor.csproj" />
     <ProjectReference Include="Unity.BuildReportInspector.Editor.csproj" />
     <ProjectReference Include="CrazyGamesDefineManager.csproj" />
   </ItemGroup>

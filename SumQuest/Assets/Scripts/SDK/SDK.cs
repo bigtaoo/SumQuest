@@ -7,7 +7,7 @@ public static class SDK
 
     public static void Initialize()
     {
-    #if UNITY_WEBGL
+    #if UNITY_WEBGL && UNITY_CRAZYGAMES
         SDKInstance = new CrazyGamesSDK();
     #elif UNITY_IOS
     #elif UNITY_ANDROID

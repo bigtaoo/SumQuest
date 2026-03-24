@@ -1,4 +1,4 @@
-#if UNITY_WEBGL
+#if UNITY_WEBGL && UNITY_CRAZYGAMES
 public class CrazyGamesSDK : SDKInterface
 {
     public void Initialize()
